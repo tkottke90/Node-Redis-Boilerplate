@@ -25,7 +25,7 @@
 
 // HTML Auth Request Static Files
 
-    app.get(`${root}/oauth/authorize`)
+    
 
 // RESTful API
     // GET

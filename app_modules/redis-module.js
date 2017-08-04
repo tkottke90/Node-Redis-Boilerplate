@@ -199,6 +199,17 @@ module.exports = {
 
         // DELETE
 
+    // Auth Functions
+        // New Provider Request
+
+        // Approve Provider Request
+
+        // 
+
+        // New Project Request
+
+        // Approve Project Request
+
 }
 
 // Module Local Functions
@@ -305,3 +316,45 @@ module.exports = {
             else { return 0; }
         }
     }
+
+
+// Notes
+    /*
+        Data:
+            Data(keys) are tied to the user by a user email.  Users create new key via a static file page with request form.
+    
+        Redis Storage Structure:
+            * OAuth Information *
+            1) clients_req : [ {json} ], - Requsts are stored as stringafied json objects that will include information on the requster.  This list is for providers or applications who are looking to pull user data  
+            2) registered_clients : - List of registered clients (Hash)
+                [ 
+                    <clientID> : {  - JSON string of client info
+                        "secret" : <string>, 
+                        "access" : [ <string> ], - List of data available to client with user permission
+                        "tokens" : [ <string> ] - List of tokens client is currently using
+                    } 
+                ],  
+            3) tokens : [- List of active tokens (Hash)
+                    <token> : { - JSON String of token info
+                        ""
+                    }
+                ],
+
+            4) user_req : [],
+            ) 
+
+            ) key_ref : [ <strings> ], - Array of keys that hold data in the db.  
+            ) temp_key_ref: [ <strings> ], - Array of keys that have an expiration.  Used to create temporary stores in the Redis DB
+
+            * Data Template *
+            n) <128-bit key> : {
+                "project_name" : <string>,
+                "user_email" : <string>,
+                "create_date" : <number>, - Millisecond Value Representing the date the key was created
+                "delete_date" : <number>, - Millisecond Value Represending when the key is scheduled to be deleted.  A value of -1 means the key will never be deleted automatically
+                "security" : { <json objects> }, - Log of security issues
+                "password" : { password: <encrypted password>, salt : <string> }, - Password for database
+                "root" : { <json> } - Users data
+            }
+
+    */

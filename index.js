@@ -14,6 +14,7 @@
     const auth = require('./app_modules/oauth-module.js');
 
 // Variables
+    var root = '';
     var app = express();
 
     var DEBUG = false; // DEBUG Message Setting
@@ -21,6 +22,10 @@
 // Authentication
 
 // HTML Server Manager Static Files
+
+// HTML Auth Request Static Files
+
+    app.get(`${root}/oauth/authorize`)
 
 // RESTful API
     // GET

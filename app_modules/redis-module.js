@@ -10,7 +10,7 @@
 
 // Variables
     const redis_config = path.join(__dirname,'config','redis_config.json');
-    var client;
+    var client; client = redis.createClient();
     var monitor;
 
     var DEBUG = false; // Debug Message Setting;
@@ -188,7 +188,7 @@ module.exports = {
 
 
             
-        }
+        },
 
     // RESTful
         // GET
@@ -200,16 +200,61 @@ module.exports = {
         // DELETE
 
     // Auth Functions
-        // New Provider Request
+        // Add New Client to Queue
+            reqClient( name , email , callback){
+                // Get Number of Reqests
+                client.SCARD('client_req',function(err,count){
+                    // Handle Errors
+                    if(err){ smc.getMessage(1,5,`Error Getting client_req count: \n  ${err}`); response(err, null); }
 
-        // Approve Provider Request
+                    // Create Request Object
+                    var date = new Date().valueOf();
+                    var request = 
+                    {
+                        count : {
+                            "status" : 1,
+                            "req_date" : date,
+                            "info" : {
+                                "name" : name,
+                                "email" : email
+                            }
+                        }
 
-        // 
+                    };
+                    
+                    // Add Request to request lists
+                    client.SADD('client_req', JSON.stringify(request), function(err){
+                        if(err){  smc.getMessage(1,5,`Error Adding Request: \n  ${err}`); response(err,null); }
+                        else { response(null, "OK"); }
+                    });
+                });
 
-        // New Project Request
+                function response(err, res) {
+                    if(typeof callback === "function"){ return callback(err,res); }
+                    else { return err != null ? err : "OK" } 
+                }
+            },
+            
+        // Add Authorized Client
+            addClient(){
 
-        // Approve Project Request
+            },
+        // Client Exists
+            clientExists(clientID){
 
+            }, 
+
+        // Add New Datastore to Queue
+            reqDatastore(){},
+
+        // New Datastore
+            // Required Information: Project Name, Client Info, 
+            // Returns
+            genKey(){
+
+            }
+        
+        
 }
 
 // Module Local Functions
@@ -322,10 +367,46 @@ module.exports = {
     /*
         Data:
             Data(keys) are tied to the user by a user email.  Users create new key via a static file page with request form.
-    
+
+            OAuth Players: User, Server Admin, Server, User App
+
+            OAuth Path:
+                1) New Client: 
+                    1) User would like to store data on server.  
+                    2) User Makes request for client access. 
+                    3) Server recieves request, adds to queue for Server Admin
+                    4) Server Admin approves client request
+                    5) Server sends client info to user
+                2) New Datastore
+                    1) Client login to client portal
+                    2) Client fills out form and submits request
+                        - User Entered Information: Project Name, Password, Delete Date
+                    3) Server recieves request, adds to queue for Server Admin
+                    4) Server Admin approves request
+                    5) Server sends client project key info - Info also available in the user portal
+                3) Manipulate Datastore
+                    1) User App sends request for users data with token recieved from new datastore setup
+                    2) Server Authenticates Token
+                        - Tokens are valid for 60 days
+                        - Each time an active token is used, the expiration is reset
+                        - After 60 days of inactivity the token is listed as inactive
+                        - After 180 days of inactivity the token and datastore are archived
+                    3) Server serves users data
+
+
         Redis Storage Structure:
             * OAuth Information *
-            1) clients_req : [ {json} ], - Requsts are stored as stringafied json objects that will include information on the requster.  This list is for providers or applications who are looking to pull user data  
+            1) client_req : - Requsts are stored as stringafied json objects that will include information on the requster.  This list is for providers or applications who are looking to pull user data   
+                [ 
+                    <requestID> : {
+                        "status" : <number>, - Status of request.  1 = pending, 0 = approved, -1 = denied
+                        "req_date" : <number>, - Millisecond Value Representing the date the request
+                        "info" : {
+                            "client_name" : <string>, - Client's Name
+                            "client_email" : <string>, - Client's Email Address
+                        }  
+                    } 
+                ],
             2) registered_clients : - List of registered clients (Hash)
                 [ 
                     <clientID> : {  - JSON string of client info
@@ -336,11 +417,13 @@ module.exports = {
                 ],  
             3) tokens : [- List of active tokens (Hash)
                     <token> : { - JSON String of token info
-                        ""
+                        "key" : <string>,
+                        "password" : <string>
+                        "expiration" : <number>
                     }
                 ],
 
-            4) user_req : [],
+            4) data_req : [],
             ) 
 
             ) key_ref : [ <strings> ], - Array of keys that hold data in the db.  

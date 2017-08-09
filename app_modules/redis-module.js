@@ -210,21 +210,25 @@ module.exports = {
                     // Create Request Object
                     var date = new Date().valueOf();
                     var request = {};
-                    request[count] = 
+                    request= 
                     {
-                            "status" : 1,
-                            "req_date" : date,
-                            "info" : {
-                                "name" : name,
-                                "email" : email
-                            }
+                        "req_ID" : count,    
+                        "status" : 1,
+                        "req_date" : date,
+                        "info" : {
+                            "name" : name,
+                            "email" : email
+                        }
 
                     };
                     
                     // Add Request to request lists
                     client.SADD('client_req', JSON.stringify(request), function(err){
                         if(err){  smc.getMessage(1,5,`Error Adding Request: \n  ${err}`); response(err,null); }
-                        else { response(null, "OK"); }
+                        else { 
+                            smc.getMessage(1,7,`Client Request Made`)
+                            response(null, "OK"); 
+                        }
                     });
                 });
 
@@ -249,8 +253,36 @@ module.exports = {
             },
 
         // Approve Client
-            addClient(){
+            addClient( requestID, callback){
+                // Check Request ID Exists
+                client.SMEMBERS('client_req', function(err, data){
+                    // Handle Err
+                    if(err){ response(err,null); }
+                    // Iterate through requests
+                    for(var i = 0; i < data.length; i++){
+                        // Conver JSON Object
+                        var clientJson = JSON.parse(data[i]);
+                        // Get reqest key from JSON
+                        var reqID = clientJson["req_ID"];
+                        // Compare to requestID argument
+                        if(requestID == reqID){ 
+                            // Generate Client GUID
 
+                            // Set Account Type
+
+                            // Setup security
+                            
+                            console.log(`Match!`); 
+                            response(null, "OK"); 
+                            break;
+                        }
+                    }
+                }); 
+                
+                function response(err, res) {
+                    if(typeof callback === "function"){ return callback(err,res); }
+                    else { return err != null ? err : res } 
+                }
             },
         // Client Exists
             clientExists(clientID){
@@ -359,7 +391,7 @@ module.exports = {
                 smc.getMessage(1,6,"Database Backup Started")
                 client.BGSAVE(function(err, res){
                     if(err){ smc.getMessage(1,5,`Error Backing Up Redis: ${err}`); }
-                    else { smc.getMessage(1,null,"Backup Complete"); }
+                    else { smc.getMessage(1,6,"Backup Complete"); }
                 });
             }
         });
@@ -420,10 +452,10 @@ module.exports = {
                         }  
                     } 
                 ],
-            2) registered_clients : - List of registered clients (Hash)
+            2) reg_clients : - List of registered clients (Hash)
                 [ 
-                    <clientID> : {  - JSON string of client info
-                        "secret" : <string>, 
+                    <clientGUID> : {  - JSON string of client info
+                        "security" : { "password" : <string>, "salt" : <string> }, 
                         "access" : [ <string> ], - List of data available to client with user permission
                         "tokens" : [ <string> ] - List of tokens client is currently using
                     } 

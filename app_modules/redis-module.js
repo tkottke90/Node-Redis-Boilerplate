@@ -209,16 +209,15 @@ module.exports = {
 
                     // Create Request Object
                     var date = new Date().valueOf();
-                    var request = 
+                    var request = {};
+                    request[count] = 
                     {
-                        count : {
                             "status" : 1,
                             "req_date" : date,
                             "info" : {
                                 "name" : name,
                                 "email" : email
                             }
-                        }
 
                     };
                     
@@ -229,13 +228,27 @@ module.exports = {
                     });
                 });
 
+                // Response function called to consolidate callback logic
                 function response(err, res) {
                     if(typeof callback === "function"){ return callback(err,res); }
                     else { return err != null ? err : "OK" } 
                 }
             },
-            
-        // Add Authorized Client
+        // Get Client Requests List
+            getClientReq(callback){
+                // Get Info from DB
+                client.SMEMBERS('client_req', function (err, data){
+                    if(err){ smc.getMessage(1,5,`Error Getting client_req list: \n  ${err}`); response(err, null); }
+                    else { response(null, data); }
+                });
+
+                function response(err, res) {
+                    if(typeof callback === "function"){ return callback(err,res); }
+                    else { return err != null ? err : res } 
+                }
+            },
+
+        // Approve Client
             addClient(){
 
             },

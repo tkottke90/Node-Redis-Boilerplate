@@ -16,8 +16,15 @@
     var DEBUG = false; // Debug Message Setting;
 
     // Referesh Settings
-        var refresh_timer;
-        var refresh_rate;
+        var refresh_timer; // Value in Config
+        var refresh_rate;  // Value in Config
+
+        // Manages the rate at which the module will force redis to do a save
+        // By default the module will save the db every 15 mins or once 5 or more changes have happend within a 15 min window
+        //      If 15 minutes pass without 5 or more changes db_save_update++
+        //      If 5 or more changes happen within 15 minutes db_save_update--
+        var db_save_rate; // Value in Config
+        var db_save_update = 0; // Number of Backups Before Rate Update
 
     // Redis Stats
         var redis_stats =  {
@@ -49,7 +56,8 @@
         { 
             "debug" : 0,
             "monitor" : 0,
-            "refresh_rate" : 1
+            "refresh_rate" : 1,
+            "db_save_rate" : 15
         };
 
     // Time
@@ -143,10 +151,11 @@ module.exports = {
             } else {
                 // If config exists, update values from config
                 var c = JSON.parse(fs.readFileSync(redis_config));
-                //{"debug":0,"monitor":0,"refresh_rate":1}
+                //{"debug":0,"monitor":0,"refresh_rate":1, "db_save_rate" : 15}
                 DEBUG = c['debug'] == 1;  // DEBUG mode enabled
                 c['monitor'] == 1 ? redisMonitor("start"): monitor = null; // Monitor Mode Enabled by Default
                 refresh_rate = c['refresh_rate'] * timeCalc[1];
+                db_save_rate = c['db_save_rate'] || 15;
             }
 
 
@@ -387,7 +396,19 @@ module.exports = {
             }
 
             // Backup Database if more than 15 minues has passed or 5 or more changes have been made to the db
-            if(savediff > (15) || changes > 5 ){
+            if(savediff > (db_save_rate) || changes > 5 ){
+                // Update Dynamic Save Values
+                changes > 5 ? db_save_update-- : db_save_update++;
+                switch(db_save_update){
+                    case -3:
+                        db_save_rate--;
+                        writeToConfig();
+                        break;
+                    case 3:
+                        db_save_rate++;
+                        writeToConfig();
+                        break;
+                }
                 smc.getMessage(1,6,"Database Backup Started")
                 client.BGSAVE(function(err, res){
                     if(err){ smc.getMessage(1,5,`Error Backing Up Redis: ${err}`); }
@@ -404,6 +425,20 @@ module.exports = {
                 return d2 - d1;
             }
             else { return 0; }
+        }
+
+        function writeToConfig(){
+            fs.readFile(redis_config,"UTF8",function(err, data){
+                if(err){ smc.getMessage(1,5,`Error reading config for update: ${err}`); }
+                else {
+                    var conf = JSON.parse(data);
+                    conf['db_save_rate'] = db_save_rate;
+                    fs.writeFile(redis_config,JSON.stringify(conf),function(err){
+                        if(err){ smc.getMessage(1,5,`Error updating config: ${err}`) }
+                        else { smc.getMessage(1,7,`Redis_Config updated: db_save_rate ${db_save_rate} minutes`) }
+                    });
+                }
+            });
         }
     }
 

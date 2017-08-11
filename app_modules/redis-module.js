@@ -400,11 +400,11 @@ module.exports = {
                 // Update Dynamic Save Values
                 changes > 5 ? db_save_update-- : db_save_update++;
                 switch(db_save_update){
-                    case -3:
+                    case -2:
                         db_save_rate--;
                         writeToConfig();
                         break;
-                    case 3:
+                    case 2:
                         db_save_rate++;
                         writeToConfig();
                         break;
@@ -433,6 +433,7 @@ module.exports = {
                 else {
                     var conf = JSON.parse(data);
                     conf['db_save_rate'] = db_save_rate;
+                    db_save_rate = 0;
                     fs.writeFile(redis_config,JSON.stringify(conf),function(err){
                         if(err){ smc.getMessage(1,5,`Error updating config: ${err}`) }
                         else { smc.getMessage(1,7,`Redis_Config updated: db_save_rate ${db_save_rate} minutes`) }

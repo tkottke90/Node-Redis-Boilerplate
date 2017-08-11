@@ -62,27 +62,22 @@ module.exports = {
     }
 }
 
-var originsEnum = [
-    "[SERVER]",
-    "[DATABASE]",
-    "[DATABASE-MONITOR]",
-    "[ERROR]",
-    "[DEBUG]"
+const originsEnum = [
+    "[SERVER]",             // 0
+    "[DATABASE]",           // 1
+    "[DATABASE-MONITOR]",   // 2
+    "[ERROR]",              // 3
+    "[DEBUG]"               // 4
 ];
 
-var actionEnum = [
-    "[GET]",
-    "[SET]",
-    "[PUT]",
-    "[POST]",
-    "[DELETE]",
-    "[ERROR]",
-    "[SAVING]",
-    "[NOTICE]"
+const actionEnum = [
+    "[GET]",    // 0
+    "[SET]",    // 1
+    "[PUT]",    // 2
+    "[POST]",   // 3
+    "[DELETE]", // 4
+    "[ERROR]",  // 5
+    "[SAVING]", // 6
+    "[NOTICE]", // 7
+    "[CRASH]",  // 8 
 ]
-
-// Server
-
-// Database
-
-// Error

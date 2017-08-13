@@ -6,6 +6,7 @@
     const path = require('path');
     // Extra
     const redis = require('redis');
+    const bcrypt = require('bcrypt');
     const smc = require('./server-message-creator.js');
 
 // Variables
@@ -276,18 +277,31 @@ module.exports = {
                         // Compare to requestID argument
                         if(requestID == reqID){ 
                             // Generate Client GUID
-
+                                var newGUID = genGUID();
                             // Set Account Type
-
+                                var account = "developer"
                             // Setup security
+                                var salt = bcrypt.genSaltSync(16);
                             
-                            console.log(`Match!`); 
+                            
+
                             response(null, "OK"); 
                             break;
                         }
                     }
                 }); 
                 
+                function genGUID(){
+                    var guid = [];
+                    
+                    for(var i = 0; i < 1; i++){
+                        while(guid[i].length < 8){
+                            guid[i] += Math.random().toString(16).substring(2);
+                        }
+                    }
+                    return `${guid[0]}-${guid[1]}`
+                }
+
                 function response(err, res) {
                     if(typeof callback === "function"){ return callback(err,res); }
                     else { return err != null ? err : res } 
@@ -401,11 +415,13 @@ module.exports = {
                 changes > 5 ? db_save_update-- : db_save_update++;
                 switch(db_save_update){
                     case -2:
-                        db_save_rate--;
+                        // Miniumum save rate is every one minute
+                        db_save_rate == 1 ? db_save_rate = 1 : db_save_rate--;
                         writeToConfig();
                         break;
                     case 2:
-                        db_save_rate++;
+                        // Maximum save rate is every 60 minutes
+                        db_save_rate == 60 ? db_save_rate = 60 : db_save_rate++;
                         writeToConfig();
                         break;
                 }
@@ -433,7 +449,7 @@ module.exports = {
                 else {
                     var conf = JSON.parse(data);
                     conf['db_save_rate'] = db_save_rate;
-                    db_save_rate = 0;
+                    db_save_update = 0;
                     fs.writeFile(redis_config,JSON.stringify(conf),function(err){
                         if(err){ smc.getMessage(1,5,`Error updating config: ${err}`) }
                         else { smc.getMessage(1,7,`Redis_Config updated: db_save_rate ${db_save_rate} minutes`) }
@@ -485,6 +501,7 @@ module.exports = {
                         "info" : {
                             "client_name" : <string>, - Client's Name
                             "client_email" : <string>, - Client's Email Address
+                            "client_password": <string>, - Client's Password
                         }  
                     } 
                 ],

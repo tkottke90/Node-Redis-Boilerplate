@@ -211,11 +211,14 @@ module.exports = {
 
     // Auth Functions
         // Add New Client to Queue
-            reqClient( name , email , callback){
+            reqClient( name , email , password, callback){
                 // Get Number of Reqests
                 client.SCARD('client_req',function(err,count){
                     // Handle Errors
                     if(err){ smc.getMessage(1,5,`Error Getting client_req count: \n  ${err}`); response(err, null); }
+
+                    // Encrypt Password
+                    password = bcrypt.hashSync(password,8);
 
                     // Create Request Object
                     var date = new Date().valueOf();
@@ -227,7 +230,8 @@ module.exports = {
                         "req_date" : date,
                         "info" : {
                             "name" : name,
-                            "email" : email
+                            "email" : email,
+                            "password" : password
                         }
 
                     };
@@ -261,7 +265,6 @@ module.exports = {
                     else { return err != null ? err : res } 
                 }
             },
-
         // Approve Client
             addClient( requestID, callback){
                 // Check Request ID Exists
@@ -280,19 +283,31 @@ module.exports = {
                                 var newGUID = genGUID();
                             // Set Account Type
                                 var account = "developer"
-                            // Setup security
-                                var salt = bcrypt.genSaltSync(16);
-                            
-                            
 
-                            response(null, "OK"); 
+                            var user = 
+                            {
+                                "first_name" : clientJson["info"]["name"].split(' ')[0],
+                                "last_name" : clientJson["info"]["name"].split(' ')[1],
+                                "email" : clientJson["info"]["email"],
+                                "security" : {
+                                    "password" : clientJson["info"]["password"]
+                                },
+                                "account" : account,
+                                "data" : "",
+                                "tokens" : ""
+                            }
+
+                            client.HSET("reg_clients",newGUID,JSON.stringify(user),function(err){
+                                if(err){ smc.getMessage(1,5,`Error Adding Client: \n  ${err}`); response(err, null); }
+                                else { response(null, "OK"); }
+                            }); 
                             break;
                         }
                     }
                 }); 
                 
                 function genGUID(){
-                    var guid = [];
+                    var guid = ['',''];
                     
                     for(var i = 0; i < 1; i++){
                         while(guid[i].length < 8){

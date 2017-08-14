@@ -323,9 +323,34 @@ module.exports = {
                 }
             },
         // Client Exists
-            clientExists(clientID){
+            clientExistsByGUID(clientGUID){
+                client.HEXISTS('reg_clients',clientGUID, function(err, res){
+                    if(err){ smc.getMessage(1,5,`Error in HEXISTS:: \n${err}`); response(err,null); }
+                    else{ response(null,res); }
+                });
 
+                function response(err, res) {
+                    if(typeof callback === "function"){ return callback(err,res); }
+                    else { return err != null ? err : res } 
+                }
             }, 
+
+            clientExistsByUsername(clientUsername){
+                client.HVALS("reg_clients", function(err, data){
+                    if(err){ smc.getMessage(1,5,`Error in HEXISTS:: \n${err}`); response(err,null); }
+                    var values = data;
+
+                    for(var i = 0; i < values.length; i++){
+                        var user = JSON.parse(values[i]);
+                        if()
+                    }
+                });
+
+                function response(err, res) {
+                    if(typeof callback === "function"){ return callback(err,res); }
+                    else { return err != null ? err : res } 
+                }
+            },
 
         // Add New Datastore to Queue
             reqDatastore(){},

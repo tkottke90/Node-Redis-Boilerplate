@@ -79,5 +79,5 @@ const actionEnum = [
     "[ERROR]",  // 5
     "[SAVING]", // 6
     "[NOTICE]", // 7
-    "[CRASH]",  // 8 
+    "[CRASH]"   // 8 
 ]

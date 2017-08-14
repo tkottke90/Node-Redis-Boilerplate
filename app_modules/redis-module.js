@@ -211,46 +211,46 @@ module.exports = {
 
     // Auth Functions
         // Add New Client to Queue
-            reqClient( name , email , password, callback){
-                // Get Number of Reqests
-                client.SCARD('client_req',function(err,count){
-                    // Handle Errors
-                    if(err){ smc.getMessage(1,5,`Error Getting client_req count: \n  ${err}`); response(err, null); }
+            reqClient( name , email , password){
+                return new Promise(function(resolve,reject){
+                    // Get Number of Reqests
+                    client.SCARD('client_req',function(err,count){
+                        // Handle Errors
+                        if(err){ smc.getMessage(1,5,`Error Getting client_req count: \n  ${err}`); reject(err); }
 
-                    // Encrypt Password
-                    password = bcrypt.hashSync(password,8);
+                        // Encrypt Password
+                        password = bcrypt.hashSync(password,8);
 
-                    // Create Request Object
-                    var date = new Date().valueOf();
-                    var request = {};
-                    request= 
-                    {
-                        "req_ID" : count,    
-                        "status" : 1,
-                        "req_date" : date,
-                        "info" : {
-                            "name" : name,
-                            "email" : email,
-                            "password" : password
-                        }
+                        // Create Request Object
+                        var date = new Date().valueOf();
+                        var request = {};
+                        request= 
+                        {
+                            "req_ID" : count,    
+                            "status" : 1,
+                            "req_date" : date,
+                            "info" : {
+                                "name" : name,
+                                "email" : email,
+                                "password" : password
+                            }
 
-                    };
-                    
-                    // Add Request to request lists
-                    client.SADD('client_req', JSON.stringify(request), function(err){
-                        if(err){  smc.getMessage(1,5,`Error Adding Request: \n  ${err}`); response(err,null); }
-                        else { 
-                            smc.getMessage(1,7,`Client Request Made`)
-                            response(null, "OK"); 
-                        }
+                        };
+
+                        clientExistsByUsername(email)
+                            .then((exists) =>{
+                                if(err){  smc.getMessage(1,5,`Error Adding Request: \n  ${err}`); reject(err); }
+                            });
+                        // Add Request to request lists
+                        client.SADD('client_req', JSON.stringify(request), function(err){
+                            if(err){ smc.getMessage(1,5,`Error Adding Request: \n  ${err}`); reject(err,null); }
+                            else { 
+                                smc.getMessage(1,7,`Client Request Made`)
+                                resolve(true); 
+                            }
+                        });
                     });
                 });
-
-                // Response function called to consolidate callback logic
-                function response(err, res) {
-                    if(typeof callback === "function"){ return callback(err,res); }
-                    else { return err != null ? err : "OK" } 
-                }
             },
         // Get Client Requests List
             getClientReq(callback){
@@ -323,33 +323,31 @@ module.exports = {
                 }
             },
         // Client Exists
-            clientExistsByGUID(clientGUID){
-                client.HEXISTS('reg_clients',clientGUID, function(err, res){
-                    if(err){ smc.getMessage(1,5,`Error in HEXISTS:: \n${err}`); response(err,null); }
-                    else{ response(null,res); }
+            clientExistsByGUID(clientGUID, callback){
+                return new Promise(function(resolve,reject){
+                    client.HEXISTS('reg_clients',clientGUID, function(err, res){
+                        if(err){ smc.getMessage(1,5,`Error in HEXISTS:: \n${err}`); reject(err); }
+                        else{ resolve(res); }
+                    });
                 });
-
-                function response(err, res) {
-                    if(typeof callback === "function"){ return callback(err,res); }
-                    else { return err != null ? err : res } 
-                }
             }, 
 
             clientExistsByUsername(clientUsername){
-                client.HVALS("reg_clients", function(err, data){
-                    if(err){ smc.getMessage(1,5,`Error in HEXISTS:: \n${err}`); response(err,null); }
-                    var values = data;
+                return new Promise(function(resolve,reject){
+                    client.HVALS("reg_clients", function(err, data){
+                        if(err){ smc.getMessage(1,5,`Error in HVALS request for Users: \n${err}`); reject(err); }
+                        var values = data;
 
-                    for(var i = 0; i < values.length; i++){
-                        var user = JSON.parse(values[i]);
-                        if()
-                    }
+                        // Check for user email that matches
+                        for(var i = 0; i < values.length; i++){
+                            var user = JSON.parse(values[i]);
+                            if(clientUsername == user["email"]){ resolve(true); break; }
+                        }
+
+                        // No User Found
+                        resolve(false);
+                    });
                 });
-
-                function response(err, res) {
-                    if(typeof callback === "function"){ return callback(err,res); }
-                    else { return err != null ? err : res } 
-                }
             },
 
         // Add New Datastore to Queue

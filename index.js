@@ -26,7 +26,6 @@
 // HTML Auth Request Static Files
 
     
-
 // RESTful API
     // GET
 
@@ -47,4 +46,41 @@
         // Start Redis Connection
         redis.startRedis();
 
+        // Test 
+
+        test();
+
+        // redis.reqClient("Thomas Kottke", "t.kottke90@gmail.com", "12345", function(err){
+        //     redis.getClientReq(function(err,res){
+        //         console.log(res);
+        //     });
+        // });
+
+        //redis.addClient(0);
+ 
+        
+
+        // redis.clientExistsByUsername("t.kottke90@gmail.com")
+        //     .then((result) => { 
+        //         console.log(result); 
+                
+            
+        //     })
+        //     .catch((err) => { console.log(err); });
+
+        /*
+            redis.clientExistsByUsername("t.kottke()@gmail.com", function (err, result){
+                if(err) { <Log Err> }
+                else{ console.log(result) }
+            }):
+        */
+        
+        // End Test
+
     }); 
+
+    async function test(){
+
+        console.log(await redis.clientExistsByUsername(""));
+
+    }

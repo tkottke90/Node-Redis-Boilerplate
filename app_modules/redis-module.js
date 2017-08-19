@@ -237,10 +237,7 @@ module.exports = {
 
                         };
 
-                        clientExistsByUsername(email)
-                            .then((exists) =>{
-                                if(err){  smc.getMessage(1,5,`Error Adding Request: \n  ${err}`); reject(err); }
-                            });
+                        
                         // Add Request to request lists
                         client.SADD('client_req', JSON.stringify(request), function(err){
                             if(err){ smc.getMessage(1,5,`Error Adding Request: \n  ${err}`); reject(err,null); }
@@ -323,17 +320,17 @@ module.exports = {
                 }
             },
         // Client Exists
-            clientExistsByGUID(clientGUID, callback){
-                return new Promise(function(resolve,reject){
+            async clientExistsByGUID(clientGUID){
+                return new Promise((resolve,reject) => {
                     client.HEXISTS('reg_clients',clientGUID, function(err, res){
-                        if(err){ smc.getMessage(1,5,`Error in HEXISTS:: \n${err}`); reject(err); }
-                        else{ resolve(res); }
+                        if(err){ smc.getMessage(1,5,`Error in HEXISTS:: \n${err}`); throw err; }
+                        else{ return res; }
                     });
                 });
             }, 
 
             clientExistsByUsername(clientUsername){
-                return new Promise(function(resolve,reject){
+                return new Promise((resolve, reject) => { 
                     client.HVALS("reg_clients", function(err, data){
                         if(err){ smc.getMessage(1,5,`Error in HVALS request for Users: \n${err}`); reject(err); }
                         var values = data;
@@ -341,7 +338,7 @@ module.exports = {
                         // Check for user email that matches
                         for(var i = 0; i < values.length; i++){
                             var user = JSON.parse(values[i]);
-                            if(clientUsername == user["email"]){ resolve(true); break; }
+                            if(clientUsername == user["email"]){ resolve(true);}
                         }
 
                         // No User Found

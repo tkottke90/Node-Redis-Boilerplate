@@ -80,7 +80,9 @@
     }); 
 
     async function test(){
-
-        console.log(await redis.clientExistsByUsername(""));
-
+        if(await redis.clientExistsByUsername("t.kottke@gmail.com")){
+            console.log(`The User Exists!`);
+        } else {
+            console.log(`No User Found`);
+        }
     }

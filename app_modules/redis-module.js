@@ -192,6 +192,7 @@ module.exports = {
                 })
             });
 
+            
             client.on('end', function(){
                 clearInterval(refresh_timer);
             });
@@ -250,59 +251,59 @@ module.exports = {
                 });
             },
         // Get Client Requests List
-            getClientReq(callback){
-                // Get Info from DB
-                client.SMEMBERS('client_req', function (err, data){
-                    if(err){ smc.getMessage(1,5,`Error Getting client_req list: \n  ${err}`); response(err, null); }
-                    else { response(null, data); }
+            getClientReq(){
+                return new Promise((resolve, reject) => {
+                    // Get Info from DB
+                    client.SMEMBERS('client_req', function (err, data){
+                        if(err){ smc.getMessage(1,5,`Error Getting client_req list: \n  ${err}`); reject(err); }
+                        else { resolve(data); }
+                    });
                 });
-
-                function response(err, res) {
-                    if(typeof callback === "function"){ return callback(err,res); }
-                    else { return err != null ? err : res } 
-                }
             },
         // Approve Client
             addClient( requestID, callback){
-                // Check Request ID Exists
-                client.SMEMBERS('client_req', function(err, data){
-                    // Handle Err
-                    if(err){ response(err,null); }
-                    // Iterate through requests
-                    for(var i = 0; i < data.length; i++){
-                        // Conver JSON Object
-                        var clientJson = JSON.parse(data[i]);
-                        // Get reqest key from JSON
-                        var reqID = clientJson["req_ID"];
-                        // Compare to requestID argument
-                        if(requestID == reqID){ 
-                            // Generate Client GUID
-                                var newGUID = genGUID();
-                            // Set Account Type
-                                var account = "developer"
+                return new Promise((resolve, reject) => {
+                    // Check Request ID Exists
+                    client.SMEMBERS('client_req', function(err, data){
+                        // Handle Err
+                        if(err){ response(err,null); }
+                        // Iterate through requests
+                        for(var i = 0; i < data.length; i++){
+                            // Conver JSON Object
+                            var clientJson = JSON.parse(data[i]);
+                            // Get reqest key from JSON
+                            var reqID = clientJson["req_ID"];
+                            // Compare to requestID argument
+                            if(requestID == reqID){ 
+                                // Generate Client GUID
+                                    var newGUID = genGUID();
+                                // Set Account Type
+                                    var account = "developer"
 
-                            var user = 
-                            {
-                                "first_name" : clientJson["info"]["name"].split(' ')[0],
-                                "last_name" : clientJson["info"]["name"].split(' ')[1],
-                                "email" : clientJson["info"]["email"],
-                                "security" : {
-                                    "password" : clientJson["info"]["password"]
-                                },
-                                "account" : account,
-                                "data" : "",
-                                "tokens" : ""
+                                var user = 
+                                {
+                                    "first_name" : clientJson["info"]["name"].split(' ')[0],
+                                    "last_name" : clientJson["info"]["name"].split(' ')[1],
+                                    "email" : clientJson["info"]["email"],
+                                    "security" : {
+                                        "password" : clientJson["info"]["password"]
+                                    },
+                                    "account" : account,
+                                    "data" : "",
+                                    "tokens" : ""
+                                }
+
+                                client.HSET("reg_clients",newGUID,JSON.stringify(user),function(err){
+                                    if(err){ smc.getMessage(1,5,`Error Adding Client: \n  ${err}`); response(err, null); }
+                                    else { response(null, "OK"); }
+                                }); 
+                                break;
                             }
-
-                            client.HSET("reg_clients",newGUID,JSON.stringify(user),function(err){
-                                if(err){ smc.getMessage(1,5,`Error Adding Client: \n  ${err}`); response(err, null); }
-                                else { response(null, "OK"); }
-                            }); 
-                            break;
                         }
-                    }
-                }); 
+                    }); 
                 
+                });
+
                 function genGUID(){
                     var guid = ['',''];
                     
@@ -320,7 +321,12 @@ module.exports = {
                 }
             },
         // Client Exists
-            async clientExistsByGUID(clientGUID){
+            /**
+             * Function returns if a client with 'clientGUID' exists in the database
+             * @param {string} clientGUID 
+             * @returns {Promise}
+             */
+            clientExistsByGUID(clientGUID){
                 return new Promise((resolve,reject) => {
                     client.HEXISTS('reg_clients',clientGUID, function(err, res){
                         if(err){ smc.getMessage(1,5,`Error in HEXISTS:: \n${err}`); throw err; }
@@ -329,6 +335,11 @@ module.exports = {
                 });
             }, 
 
+            /**
+             * Function returns if a client with username exists in the database
+             * @param {string} clientGUID 
+             * @returns {Promise}
+             */
             clientExistsByUsername(clientUsername){
                 return new Promise((resolve, reject) => { 
                     client.HVALS("reg_clients", function(err, data){

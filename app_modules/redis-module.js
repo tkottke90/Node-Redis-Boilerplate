@@ -88,55 +88,63 @@ module.exports = {
          * the monitoring feature is resource expensive and can hider the processing speed of the DB
          * @param {string} command 
          */
-        redisMonitor(command, callback){
-            // Array of accepted states for moitoring
-            var commands = [ "start", "shutdown" ];
+        redisMonitor(command){
+            return new Promise((resolve, reject) => {
+                // Array of accepted states for moitoring
+                var commands = [ "start", "shutdown" ];
 
 
-            switch(command){
-                case commands[0]: // Start Monitoring
-                    // If monitoring is already running, inform the user and do no start
-                    if(monitor_status == "start"){ return "Monitoring Already Running!"; }
-                    
-                    // Setup client to monitor DB actions
-                    monitor = redis.createClient();
+                switch(command){
+                    case commands[0]: // Start Monitoring
+                        // If monitoring is already running, inform the user and do no start
+                        if(monitor_status == "start"){ return "Monitoring Already Running!"; }
+                        
+                        // Setup client to monitor DB actions
+                        monitor = redis.createClient();
 
-                    monitor.on('monitor', function(time, args, raw_reply){
-                        smc.getMessage(2,null,`${args}`)
-                    });
+                        monitor.on('monitor', function(time, args, raw_reply){
+                            smc.getMessage(2,null,`${args}`)
+                        });
 
-                    monitor.monitor(function(err, res){
-                        // Log Error if there is one
-                        if(err){ smc.getMessage(3,5,"Error Starting Monitoring!"); }
-                        // Set Current Monitor Status
-                        monitor_status = "start";
-                        // Return OK if all commands are suggessful
-                        if(typeof callback == "function") { return callback(null,"OK") } else { return null };
-                    });
-                    break;
-                case commands[1]: // Shutdown Monitoring
-                    // If monitoring is not running, inform the user that it cant be stopped
-                    if(monitor_status == "shutdown"){ return "Monitoring Not Running!"; }
-                    // Log Action
-                    smc.getMessage(2,null,"Closing Monitoring Session");
-                    // Currently (Redis v3.0) to close monitoring the client session must be disconnected
-                    monitor.quit(function(err, res){
-                        // Log Error during shutdown
-                        if(err){ smc.getMessage(3,5,"Error Shutting Down Monitoring!"); }
-                        if(res == "OK"){ 
-                            // If quit successful, set monitor_status
-                            monitor_status = "shutdown";
-                            // Restart redis connection
-                            monitor = null;
-                            if(typeof callback == "function") { return callback(null,"OK") };
-                        }
-                    });
-                    break;
-                default:
-                    // Notify user that the command they used was invalid 
-                    smc.getMessage(1,null,`${command} is not a valid command for Redis Monitor`);
-                    if(typeof callback == "function") { return callback("Invalid Command",null) };
-            }
+                        monitor.monitor(function(err, res){
+                            // Log Error if there is one
+                            if(err){ smc.getMessage(3,5,"Error Starting Monitoring!"); reject(false); }
+                            // Set Current Monitor Status
+                            monitor_status = "start";
+                            // Return OK if all commands are suggessful
+                            resolve(true);
+                        });
+                        break;
+                    case commands[1]: // Shutdown Monitoring
+                        // If monitoring is not running, inform the user that it cant be stopped
+                        if(monitor_status == "shutdown"){ return "Monitoring Not Running!"; }
+                        // Log Action
+                        smc.getMessage(2,null,"Closing Monitoring Session");
+                        // Currently (Redis v3.0) to close monitoring the client session must be disconnected
+                        monitor.quit(function(err, res){
+                            // Log Error during shutdown
+                            if(err){ 
+                                smc.getMessage(3,5,"Error Shutting Down Monitoring!"); 
+                                reject(false); 
+                            }
+                            if(res == "OK"){ 
+                                // If quit successful, set monitor_status
+                                monitor_status = "shutdown";
+                                // Restart redis connection
+                                monitor = null;
+                                resolve(true);
+                            }
+                            else {
+                                resolve(false);
+                            }
+                        });
+                        break;
+                    default:
+                        // Notify user that the command they used was invalid 
+                        smc.getMessage(1,null,`${command} is not a valid command for Redis Monitor`);
+                        reject(false);
+                }
+            });
         },    
 
         startRedis(){
@@ -261,12 +269,14 @@ module.exports = {
                 });
             },
         // Approve Client
-            addClient( requestID, callback){
+            addClient( requestID){
                 return new Promise((resolve, reject) => {
                     // Check Request ID Exists
                     client.SMEMBERS('client_req', function(err, data){
                         // Handle Err
-                        if(err){ response(err,null); }
+                        if(err){ 
+                            reject(err); 
+                        }
                         // Iterate through requests
                         for(var i = 0; i < data.length; i++){
                             // Conver JSON Object
@@ -294,8 +304,12 @@ module.exports = {
                                 }
 
                                 client.HSET("reg_clients",newGUID,JSON.stringify(user),function(err){
-                                    if(err){ smc.getMessage(1,5,`Error Adding Client: \n  ${err}`); response(err, null); }
-                                    else { response(null, "OK"); }
+                                    if(err){ 
+                                        smc.getMessage(1,5,`Error Adding Client: \n  ${err}`); 
+                                        reject(err); 
+                                    } else { 
+                                        resonse("OK"); 
+                                    }
                                 }); 
                                 break;
                             }
@@ -329,8 +343,11 @@ module.exports = {
             clientExistsByGUID(clientGUID){
                 return new Promise((resolve,reject) => {
                     client.HEXISTS('reg_clients',clientGUID, function(err, res){
-                        if(err){ smc.getMessage(1,5,`Error in HEXISTS:: \n${err}`); throw err; }
-                        else{ return res; }
+                        if(err){ 
+                            smc.getMessage(1,5,`Error in HEXISTS:: \n${err}`); 
+                            reject(false); 
+                        }
+                        else{ resolve(res); }
                     });
                 });
             }, 

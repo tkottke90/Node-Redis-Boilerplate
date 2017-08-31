@@ -259,6 +259,10 @@ module.exports = {
                 });
             },
         // Get Client Requests List
+            /**
+             * Returns a list of pending client requests
+             * @returns {string} Array of requestIDs
+             */
             getClientReq(){
                 return new Promise((resolve, reject) => {
                     // Get Info from DB
@@ -268,8 +272,30 @@ module.exports = {
                     });
                 });
             },
+
+        // Get Client Request ID
+            getClientReqInfo(requestID){
+                return new Promise((resolve, reject) => {
+                    client.SMEMBERS('client_req', function(err, data){
+                        if(err){
+                            reject(err);
+                        }
+
+                        for(var i = 0; i < data.length; i++){
+                            // Convert to JSON Object
+                            var clientJson = JSON.parse(data[i]);
+                            // Get Request Key from JSON
+                            var reqID = clientJSON["req_ID"];
+                            if(requestID == reqID){
+                                
+                            }
+
+                        }
+                    });
+                });
+            },
         // Approve Client
-            addClient( requestID){
+            addClient(requestID){
                 return new Promise((resolve, reject) => {
                     // Check Request ID Exists
                     client.SMEMBERS('client_req', function(err, data){

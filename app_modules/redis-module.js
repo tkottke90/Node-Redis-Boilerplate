@@ -208,7 +208,7 @@ module.exports = {
 
             
         },
-
+    
     // RESTful
         // GET
 
@@ -233,7 +233,7 @@ module.exports = {
                         // Create Request Object
                         var date = new Date().valueOf();
                         var request = {};
-                        request= 
+                        request = 
                         {
                             "req_ID" : count,    
                             "status" : 1,
@@ -273,7 +273,7 @@ module.exports = {
                 });
             },
 
-        // Get Client Request ID
+        // Get Client Request Info Based on ID
             getClientReqInfo(requestID){
                 return new Promise((resolve, reject) => {
                     client.SMEMBERS('client_req', function(err, data){
@@ -283,18 +283,26 @@ module.exports = {
 
                         for(var i = 0; i < data.length; i++){
                             // Convert to JSON Object
-                            var clientJson = JSON.parse(data[i]);
+                            var clientJSON = JSON.parse(data[i]);
                             // Get Request Key from JSON
                             var reqID = clientJSON["req_ID"];
                             if(requestID == reqID){
-                                
+                                resolve(clientJSON);
+                            }
+                        }
+
+                        // If no request ID found, reject with no id found
+                        reject(JSON.stringify(
+                            {
+                                "message" : `No ID of ${requestID} found`
                             }
 
-                        }
+                        ));
                     });
                 });
             },
-        // Approve Client
+
+        // Approve Client Reqeust
             addClient(requestID){
                 return new Promise((resolve, reject) => {
                     // Check Request ID Exists
@@ -329,6 +337,15 @@ module.exports = {
                                     "tokens" : ""
                                 }
 
+                                // Update Request Lists
+                                // await client.SREM("client_req", data[i],(err, res) => {
+                                //     if(err){
+                                        
+                                //     } else {
+
+                                //     }
+                                // });
+
                                 client.HSET("reg_clients",newGUID,JSON.stringify(user),function(err){
                                     if(err){ 
                                         smc.getMessage(1,5,`Error Adding Client: \n  ${err}`); 
@@ -360,7 +377,8 @@ module.exports = {
                     else { return err != null ? err : res } 
                 }
             },
-        // Client Exists
+
+        // Check if Client Exists
             /**
              * Function returns if a client with 'clientGUID' exists in the database
              * @param {string} clientGUID 

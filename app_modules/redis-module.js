@@ -209,6 +209,100 @@ module.exports = {
             
         },
     
+    // Redis Sync Functions
+
+        // Sets
+            // List Length
+            SCARDSync(key){
+                return new Promise((resolve, reject) => {
+                    client.SCARD(key,(err, res) => {
+                        if(err){
+                            smc.getMessage(1,0,`SCARDSync Error: ${err}`);
+                            reject(err);
+                        } else {
+                            resolve(res);
+                        }
+                    });
+                });
+            },
+
+            /**
+             * Synchronous function adds a value to a set.
+             * @param {string} key Name of the set key in Redis.
+             * @param {string} value Value to be added to the set.
+             * @returns {Promise<boolean, Error>} If promise is fulfilled, return if value was added to set.  If promise is rejected, return error. 
+             */
+            SADDSync(key, value){
+                return new Promise((resolve, reject) => {
+                    client.SADD(key, value, (err, res) => {
+                        if(err){
+                            smc.getMessage(1,0,`SADDSync Error: ${err}`);
+                            reject(err);
+                        } else {
+                            res == 0 ? resolve(false) : resolve(true);
+                        }
+                    });
+                });
+            },
+
+            /**
+             * Synchronous Function checks if a value currently exists in a set.  This function checks for a
+             * complete value and does not parse through the values stored in the set.
+             * @param {string} key Name of set key in Redis
+             * @param {string} value Value that is being checked from set
+             * @returns {Promise<} True it the value exists.  False if the value does not exist or if there is an error
+             */
+            SEXISTSSync(key, value){
+                return new Promise((resolve, reject) => {
+                    // Get list of members
+                    client.SMEMBERS(key,(err, res) => {
+                        if(err){
+                            // Handle Error
+                            smc.getMessage(1,0,`SEXISTSSync Error: \r\nkey: ${key} value:${value} \r\n${err}`);
+                            reject(err);
+                        } else {
+                            // Iterate over set 
+                            for(var i = 0; i < res.length; i++){
+                                if(value == res[i]){
+                                    resolve(true);
+                                }
+                            }
+                            resolve(false);                  
+                        }
+                    });
+                });
+            },
+
+            SEXISTS_JSON(){},
+
+            // Get Members from List
+            SMEMBERSSync(){
+                return new Promise((resolve,reject) => {
+                    client.SMEMBERS(key, (err, res) => {
+                        if(err){
+                            smc.getMessage(1,0,`SMEMBERSSync Error: ${err}`);
+                            reject(err);
+                        } else {
+                            resolve(res);
+                        }
+                    });
+                });
+            },
+
+            // Remove from list
+            SREMSync(key, value){
+                return new Promise((resolve, reject) => {
+                    client.SREM(key, value, (err, res) => {
+                        if(err){
+                            smc.getMessage(1,0,`SRemSync Error: ${err}`)
+                            reject(err);
+                        } else {
+                            res == 0 ? resolve(false) : resolve(true);
+                        }
+                    });
+                });
+            },
+
     // RESTful
         // GET
 

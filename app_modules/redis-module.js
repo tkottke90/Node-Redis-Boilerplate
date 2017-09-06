@@ -231,7 +231,11 @@ module.exports = {
                 });
             },
 
-            // List Length
+            /**
+             * Synchronus function gets number of values in set.
+             * @param {string} key Name of the set key in Redis
+             * @returns {Proimse<number, Error>} If promise is fulfilled, return number of values.  If Promise is rejected, return error.
+             */
             SCARDSync(key){
                 return new Promise((resolve, reject) => {
                     client.SCARD(key,(err, res) => {
@@ -266,8 +270,11 @@ module.exports = {
                     });
                 });
             },
-            
-            // Get Members from List
+
+            /**
+             * Synchronous function pulls a list of members from a set as an array
+             * @returns {Promise<string[], Error} If promise is fulfilled, return arary of of members in set.  If promise is rejected, return error.
+             */
             SMEMBERSSync(){
                 return new Promise((resolve,reject) => {
                     client.SMEMBERS(key, (err, res) => {
@@ -281,7 +288,12 @@ module.exports = {
                 });
             },
 
-            // Remove from list
+            /**
+             * Synchronous function deletes a member from a set.
+             * @param {string} key Name of set in Redis.
+             * @param {string} value Value that will be deleted.
+             * @returns {Promise<boolean, Error>} If promise is fulfilled, return if the  
+             */
             SREMSync(key, value){
                 return new Promise((resolve, reject) => {
                     client.SREM(key, value, (err, res) => {
@@ -294,6 +306,13 @@ module.exports = {
                     });
                 });
             },
+
+        // Hash
+            // Add Key
+
+            // Add Field
+
+            // 
 
     // RESTful
         // GET

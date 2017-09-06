@@ -266,19 +266,7 @@ module.exports = {
                     });
                 });
             },
-
-            /**
-             * Synchronus Function checks if a value currently exists in a JSON object stored as a string in a set.
-             * @param {string} key Name of the set in Redis
-             * @param {string[]} JSONkey Name or path to the key in the JSON object
-             * @param {string} Value that is being checked from the JSON Object
-             */
-            SEXISTS_JSON(key, JSONkey, value){
-                return new Promise((resolve, reject) => {
-                    
-                });
-            },
-
+            
             // Get Members from List
             SMEMBERSSync(){
                 return new Promise((resolve,reject) => {

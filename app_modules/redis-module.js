@@ -275,7 +275,7 @@ module.exports = {
              * Synchronous function pulls a list of members from a set as an array
              * @returns {Promise<string[], Error} If promise is fulfilled, return arary of of members in set.  If promise is rejected, return error.
              */
-            SMEMBERSSync(){
+            SMEMBERSSync(key){
                 return new Promise((resolve,reject) => {
                     client.SMEMBERS(key, (err, res) => {
                         if(err){
@@ -320,6 +320,19 @@ module.exports = {
                                 reject(err);
                             } else {
                                 res == 0 ? resolve(false) : resolve(true);
+                            }
+                        });
+                    });
+                },
+            
+            // Hash Length
+                HLENSync(key){
+                    return new Promise((resolve, reject) => {
+                        client.HLEN(key, (err, res) => {
+                            if(err){
+                                reject(err);
+                            } else {
+                                resolve(res);
                             }
                         });
                     });
@@ -545,19 +558,11 @@ module.exports = {
                     do {
                         projectID = genProjectID();
                         
+                        HEXISTSSync("data_req", projectID)
+
                     } while(isInvalidpID)
                 });            
 
-                function genProjectID(){
-                    var guid = ['',''];
-                    
-                    for(var i = 0; i < 2; i++){
-                        while(guid[i].length < 8){
-                            guid[i] += Math.random().toString(16).substring(2);
-                        }
-                    }
-                    return `${guid[0]}-${guid[1]}`
-                }
             },
 
         // New Datastore

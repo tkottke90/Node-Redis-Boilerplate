@@ -47,8 +47,11 @@
         redis.startRedis();
 
         // Test 
-
-        test();
+        setTimeout(
+            () => {
+                test()
+            }
+        ,10);
 
         // redis.reqClient("Thomas Kottke", "t.kottke90@gmail.com", "12345", function(err){
         //     redis.getClientReq(function(err,res){
@@ -80,9 +83,11 @@
     }); 
 
     async function test(){
-        if(await redis.clientExistsByUsername("t.kottke@gmail.com")){
-            console.log(`The User Exists!`);
-        } else {
-            console.log(`No User Found`);
-        }
+        smc.getMessage(1,null,"Test Function");
+        
+
+        console.log( await redis.reqDatastore("12345", "test") ) ;
+
+
+        process.exit();
     }

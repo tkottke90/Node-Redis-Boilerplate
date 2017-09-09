@@ -313,30 +313,30 @@ module.exports = {
             // Add Field
 
             // Key Exists
-                HEXISTSSync(key, field){
-                    return new Promise((resolve, reject) => {
-                        client.HEXISTS(key, field, (err, res) => {
-                            if(err){
-                                reject(err);
-                            } else {
-                                res == 0 ? resolve(false) : resolve(true);
-                            }
-                        });
-                    });
-                },
+                // HEXISTSSync(key, field){
+                //     return new Promise((resolve, reject) => {
+                //         client.HEXISTS(key, field, (err, res) => {
+                //             if(err){
+                //                 reject(err);
+                //             } else {
+                //                 res == 0 ? resolve(false) : resolve(true);
+                //             }
+                //         });
+                //     });
+                // },
             
             // Hash Length
-                HLENSync(key){
-                    return new Promise((resolve, reject) => {
-                        client.HLEN(key, (err, res) => {
-                            if(err){
-                                reject(err);
-                            } else {
-                                resolve(res);
-                            }
-                        });
-                    });
-                },
+                // HLENSync(key){
+                //     return new Promise((resolve, reject) => {
+                //         client.HLEN(key, (err, res) => {
+                //             if(err){
+                //                 reject(err);
+                //             } else {
+                //                 resolve(res);
+                //             }
+                //         });
+                //     });
+                // },
 
     // RESTful
         // GET
@@ -549,20 +549,30 @@ module.exports = {
             },
 
         // Add New Datastore Request to Queue
-            reqDatastore(userGUID, projectName){
+            async reqDatastore(userGUID, projectName){
                 return new Promise((resolve, reject) => {
-                    
-                    var projectID;
-                    var isInvalidpID = true;
-                    
-                    do {
-                        projectID = genProjectID();
-                        
-                        HEXISTSSync("data_req", projectID)
+                
+                    var projectID = await HLENSync("data_req") + 1;
+                    var date = new Date().valueOf();
+                    var request = {
+                        "proID" : projectID,
+                        "req_date" : date,
+                        "project_name" : projectName,
+                        "client_GUID" : userGUID,
+                        "status" : 1
+                    };
 
-                    } while(isInvalidpID)
+                    resolve(request);
+                    
+
+                    // client.HSET("data_req",projectID, JSON.stringify(request),(err, res) => {
+                    //     if(err){
+                    //         reject(err);
+                    //     } else {
+                    //         resolve(res);
+                    //     }
+                    // });
                 });            
-
             },
 
         // New Datastore
@@ -709,6 +719,31 @@ module.exports = {
         }
     }
 
+
+
+    function HEXISTSSync(key, field){
+        return new Promise((resolve, reject) => {
+            client.HEXISTS(key, field, (err, res) => {
+                if(err){
+                    reject(err);
+                } else {
+                    res == 0 ? resolve(false) : resolve(true);
+                }
+            });
+        });
+    }
+
+    function HLENSync(key){
+        return new Promise((resolve, reject) => {
+            client.HLEN(key, (err, res) => {
+                if(err){
+                    reject(err);
+                } else {
+                    resolve(res);
+                }
+            });
+        });
+    }
 
 // Notes
     /*

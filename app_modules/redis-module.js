@@ -312,7 +312,18 @@ module.exports = {
 
             // Add Field
 
-            // 
+            // Key Exists
+                HEXISTSSync(key, field){
+                    return new Promise((resolve, reject) => {
+                        client.HEXISTS(key, field, (err, res) => {
+                            if(err){
+                                reject(err);
+                            } else {
+                                res == 0 ? resolve(false) : resolve(true);
+                            }
+                        });
+                    });
+                },
 
     // RESTful
         // GET
@@ -324,7 +335,7 @@ module.exports = {
         // DELETE
 
     // Auth Functions
-        // Add New Client to Queue
+        // Add New Client Request to Queue
             reqClient( name , email , password){
                 return new Promise(function(resolve,reject){
                     // Get Number of Reqests
@@ -469,7 +480,7 @@ module.exports = {
                 function genGUID(){
                     var guid = ['',''];
                     
-                    for(var i = 0; i < 1; i++){
+                    for(var i = 0; i < 2; i++){
                         while(guid[i].length < 8){
                             guid[i] += Math.random().toString(16).substring(2);
                         }
@@ -524,8 +535,30 @@ module.exports = {
                 });
             },
 
-        // Add New Datastore to Queue
-            reqDatastore(){},
+        // Add New Datastore Request to Queue
+            reqDatastore(userGUID, projectName){
+                return new Promise((resolve, reject) => {
+                    
+                    var projectID;
+                    var isInvalidpID = true;
+                    
+                    do {
+                        projectID = genProjectID();
+                        
+                    } while(isInvalidpID)
+                });            
+
+                function genProjectID(){
+                    var guid = ['',''];
+                    
+                    for(var i = 0; i < 2; i++){
+                        while(guid[i].length < 8){
+                            guid[i] += Math.random().toString(16).substring(2);
+                        }
+                    }
+                    return `${guid[0]}-${guid[1]}`
+                }
+            },
 
         // New Datastore
             // Required Information: Project Name, Client Info, 
@@ -733,8 +766,17 @@ module.exports = {
                     }
                 ],
 
-            4) data_req : [],
-            ) 
+            4) data_req : [ - List of requests for data store allocation
+                <request> : { - JSON String of project request info
+                    "status" : <number>, - Status of request.  1 = pending, 0 = approved, -1 = denied
+                    "req_date" : <number>, - Millisecond Value Representing the date the request
+                        "info" : {
+                            "clientGUID" : <string>, - GUID from client account
+                            "project_name" : <string>, - 
+                            
+                        }
+                }
+            ],
 
             ) key_ref : [ <strings> ], - Array of keys that hold data in the db.  
             ) temp_key_ref: [ <strings> ], - Array of keys that have an expiration.  Used to create temporary stores in the Redis DB

@@ -6,7 +6,7 @@
     const path = require('path');
     // Extra
     const redis = require('redis');
-    const bcrypt = require('bcrypt');
+    //const bcrypt = require('bcrypt');
     const smc = require('./server-message-creator.js');
 
 // Variables
@@ -552,7 +552,7 @@ module.exports = {
             async reqDatastore(userGUID, projectName){
                 return new Promise((resolve, reject) => {
                 
-                    var projectID = await HLENSync("data_req") + 1;
+                    var projectID = HLENSync("data_req") + 1;
                     var date = new Date().valueOf();
                     var request = {
                         "proID" : projectID,

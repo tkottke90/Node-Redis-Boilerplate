@@ -8,9 +8,10 @@
     // Extra
     const express = require('express');
     const bparser = require('body-parser');
-    const bcrypt = require('bcrypt');    
+    //const bcrypt = require('bcrypt');    
     const smc = require('./app_modules/server-message-creator.js');
     const redis = require('./app_modules/redis-module.js');
+    const redis_sync = require('./app_modules/redis-sync.js');
     const auth = require('./app_modules/oauth-module.js');
 
 // Variables
@@ -83,11 +84,12 @@
     }); 
 
     async function test(){
-        smc.getMessage(1,null,"Test Function");
+        smc.getMessage(0,null,"Test Function \n\n");
         
+        redis_sync.client = redis.client;
 
-        console.log( await redis.reqDatastore("12345", "test") ) ;
+        console.log(await redis_sync.SCARDSync("testSet"));
 
-
+        smc.getMessage(0,null,"End of Test");
         process.exit();
     }

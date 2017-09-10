@@ -85,10 +85,13 @@
 
     async function test(){
         smc.getMessage(0,null,"Test Function \n\n");
-        
-        redis_sync.client = redis.client;
 
-        console.log(await redis_sync.SCARDSync("testSet"));
+        try{
+            var request = await redis.reqDatastore(0, "testProject");
+        } catch(e) {
+            console.log(`Error in call: \n${request} \n`)
+        }
+        console.log(`${request}`);
 
         smc.getMessage(0,null,"End of Test");
         process.exit();

@@ -549,7 +549,7 @@ module.exports = {
             },
 
         // Add New Datastore Request to Queue
-            async reqDatastore(userGUID, projectName){
+            reqDatastore(userGUID, projectName){
                 return new Promise((resolve, reject) => {
                 
                     var projectID = HLENSync("data_req") + 1;

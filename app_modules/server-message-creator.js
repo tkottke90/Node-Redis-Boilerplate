@@ -1,5 +1,7 @@
 "use strict"
 
+var fs = require('fs');
+
 /**
  * Module designed to output messages to server log.  Used to clean up index.js
  * 
@@ -33,13 +35,33 @@ module.exports = {
      * @param {Number or Null} action - Reference to actionsEnum
      * @param {String} message - Message to be recorded
      */
-    logMessage(orgin, action, message){
-        var now = new Date().valueOf();
-        if(action != null){
-            return `${now} - ${originsEnum[origin]} - ${action} - ${message}`;
+    async logMessage(orgin, action, message){
+        var now = new Date().toUTCString();
+        var log = messageCreate(origin, action, message);
+        console.log(log);
+
+        if(!fs.existsSync('./logs')){
+            fs.mkdirSync('./logs');
         }
-        else{
-            return `${now} - ${originsEnum[origin]} - ${message}`;
+
+        if(!fs.exsits('./logs/eventLog')){
+            var header = 
+                {  
+                    'metaData' : {
+                        'createDate' : 0,
+                        'lastModified' : 0,
+                        'logAge': 0,
+                    },
+                    'logs' : {
+                        now : {
+                            'origin' : origin,
+                            'action' : action,
+                            'message' : message
+                        }
+                    }
+                }
+            
+            fs.writeFileSync
         }
     },
 
@@ -50,15 +72,7 @@ module.exports = {
      * @param {*} message 
      */
     getMessage( origin, action, message ){
-        var now = new Date().toUTCString();
-        if(action != null){       
-            console.log(`${now} - ${originsEnum[origin]} - ${actionEnum[action]} - ${message}`);
-            return `${now} - ${originsEnum[origin]} - ${actionEnum[action]} - ${message}`;
-        }
-        else{
-            console.log(`${now} - ${originsEnum[origin]} - ${message}`);
-            return `${now} - ${originsEnum[origin]} - ${message}`;
-        }
+        console.log(messageCreate(origin, action, message));
     }
 }
 
@@ -81,3 +95,19 @@ const actionEnum = [
     "[NOTICE]", // 7
     "[CRASH]"   // 8 
 ]
+
+/**
+ * 
+ * @param {Number} origin 
+ * @param {Number} action 
+ * @param {*} message 
+ */
+function messageCreate(origin, action, message){
+    var now = new Date().toUTCString();
+    if(action != null){       
+        return `${now} - ${originsEnum[origin]} - ${actionEnum[action]} - ${message}`;
+    }
+    else{
+        return `${now} - ${originsEnum[origin]} - ${message}`;
+    }
+}

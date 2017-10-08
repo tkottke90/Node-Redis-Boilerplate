@@ -42,8 +42,12 @@
 // Server Listeners
     app.listen(8080,function(err){
         // Check for Errors - Log Server Running Message
-        !err ? smc.getMessage(0,null,"Server Running on port: 8080") : function(err){ smc.getMessage(0,5,`Error Starting Server: ${err} \n Shutting Down`); process.exit(1); };
-        
+        if(!err){ 
+            smc.getMessage(0,null,"Server Running on port: 8080"); 
+        } else {
+            smc.getMessage(0,5,`Error Starting Server: ${err} \n Shutting Down`); 
+            process.exit(1);    
+        }
         // Start Redis Connection
         redis.startRedis();
 
@@ -52,7 +56,7 @@
             () => {
                 test()
             }
-        ,10);
+        ,100);
 
         // redis.reqClient("Thomas Kottke", "t.kottke90@gmail.com", "12345", function(err){
         //     redis.getClientReq(function(err,res){
@@ -87,7 +91,13 @@
         smc.getMessage(0,null,"Test Function \n\n");
 
         try{
-            var request = await redis.reqDatastore(0, "testProject");
+            
+            if(!fs.existsSync('./logs/smcLog')){
+                fs.mkdirSync('./logs/');
+            }
+
+
+
         } catch(e) {
             console.log(`Error in call: \n${request} \n`)
         }

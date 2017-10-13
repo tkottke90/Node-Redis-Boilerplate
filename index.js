@@ -86,7 +86,7 @@
     async function test(){
         smc.getMessage(0,null,"Test Function \n\n");
 
-        auth.addClientReq("Jon Doe", "jdoe@deer.com", "12345");
+        console.log(`Results: ${await redis.SADDSync("key", "value")}`);
 
         smc.getMessage(0,null,"End of Test");
         process.exit();

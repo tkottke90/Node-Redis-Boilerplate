@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "mocha": "mocha"
   },
   "keywords": [],
   "author": "",
@@ -17,6 +18,10 @@
   },
   "devDependencies": {
     "chai": "^4.1.2",
-    "mocha": "^4.0.1"
+    "istanbul": "^0.4.5",
+    "mocha": "^4.0.1",
+    "redis-mock": "^0.20.0",
+    "rewire": "^2.5.2",
+    "sinon": "^4.0.1"
   }
 }

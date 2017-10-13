@@ -216,7 +216,8 @@ module.exports = {
              * Synchronous function adds a value to a set.
              * @param {string} key Name of the set key in Redis.
              * @param {string} value Value to be added to the set.
-             * @returns {Promise<boolean, Error>} If promise is fulfilled, return if value was added to set.  If promise is rejected, return error. 
+             * @returns
+             *{Promise<boolean, Error>} If promise is fulfilled, return if value was added to set.  If promise is rejected, return error. 
              */
             SADDSync(key, value){
                 return new Promise((resolve, reject) => {
@@ -249,6 +250,8 @@ module.exports = {
                 });
             },
 
+            
+
             /**
              * Synchronous Function checks if a value currently exists in a set.  This function checks for a
              * complete value and does not parse through the values stored in the set.
@@ -262,7 +265,7 @@ module.exports = {
                     client.SISMEMBER(key,(err, res) => {
                         if(err){
                             // Handle Error
-                            smc.getMessage(1,0,`SEXISTSSync Error: \r\nkey: ${key} value:${value} \r\n${err}`);
+                            smc.getMessage(1,0,`SISMEMBER Error: \r\nkey: ${key} value:${value} \r\n${err}`);
                             reject(err);
                         } else {
                             resolve(res);                  

@@ -86,12 +86,7 @@
     async function test(){
         smc.getMessage(0,null,"Test Function \n\n");
 
-        try{
-            var request = await redis.reqDatastore(0, "testProject");
-        } catch(e) {
-            console.log(`Error in call: \n${request} \n`)
-        }
-        console.log(`${request}`);
+        auth.addClientReq("Jon Doe", "jdoe@deer.com", "12345");
 
         smc.getMessage(0,null,"End of Test");
         process.exit();

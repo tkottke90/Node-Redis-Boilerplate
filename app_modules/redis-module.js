@@ -268,7 +268,8 @@ module.exports = {
                             smc.getMessage(1,0,`SISMEMBER Error: \r\nkey: ${key} value:${value} \r\n${err}`);
                             reject(err);
                         } else {
-                            resolve(res);                  
+                            console.log(res);
+                            res == 0 ? resolve(false) : resolve(true);                  
                         }
                     });
                 });

@@ -90,22 +90,7 @@
     async function test(){
         smc.getMessage(0,null,"Test Function \n\n");
 
-<<<<<<< HEAD
-        console.log(`Results: ${await redis.SADDSync("key", "value")}`);
-=======
-        try{
-            
-            if(!fs.existsSync('./logs/smcLog')){
-                fs.mkdirSync('./logs/');
-            }
 
-
-
-        } catch(e) {
-            console.log(`Error in call: \n${request} \n`)
-        }
-        console.log(`${request}`);
->>>>>>> 0dd47380b003f1c19251b8c48e9c52220bde7934
 
         smc.getMessage(0,null,"End of Test");
         process.exit();

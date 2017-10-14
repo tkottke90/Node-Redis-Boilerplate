@@ -38,23 +38,23 @@ describe("Redis Set Sync Functions", function () {
         });
     });
     
-    // describe("SISMEMBERSync( set : string, member : string )", function(){
-    //     it('should return true if the item exists', async function(){
-    //         var sismember_results = await spec.SISMEMBERSync('key', 'value');
+    describe("SISMEMBERSync( set : string, member : string )", function(){
+        it('should return true if the item exists', async function(){
+            var sismember_results = await spec.SISMEMBERSync('key', 'value');
 
-    //         expect(sismember_results).to.equal(true);
-    //     });
+            expect(sismember_results).to.equal(true);
+        });
 
-    //     it('should return false as the item |chocolate| does not exist', function(){
-    //         var sismember_results = await spec.SISMEMBERSync('key', 'chocolate');
+        // it('should return false as the item |chocolate| does not exist', function(){
+        //     var sismember_results = await spec.SISMEMBERSync('key', 'chocolate');
 
-    //         expect(sismember_results).to.equal(false);
-    //     });
-    // });
+        //     expect(sismember_results).to.equal(false);
+        // });
+    });
 
-    describe("SMEMBERSync( set : string )", function(){
+    describe("SMEMBERSSync( set : string )", function(){
         it('should return a list of members in the set', async function(){
-            var smember_results = await spec.SMEMBERSync('key');
+            var smember_results = await spec.SMEMBERSSync('key');
 
             expect(smember_results).to.equal([ 'value' ]);
         });

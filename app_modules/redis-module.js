@@ -250,8 +250,6 @@ module.exports = {
                 });
             },
 
-            
-
             /**
              * Synchronous Function checks if a value currently exists in a set.  This function checks for a
              * complete value and does not parse through the values stored in the set.
@@ -312,7 +310,18 @@ module.exports = {
 
         // Hash
             // Add Key
-
+            HSETSync(key, field, value){
+                return new Promise((resolve, reject) => {
+                    client.HSET(key, field, value, (err, res) => {
+                        if(err){
+                            smc.getMessage(1,0,`HSET: ${err}`);
+                            reject(err);
+                        } else {
+                            res == 0 ? resolve(false) : resolve(true);
+                        }
+                    });
+                });
+            },
             // Add Field
 
             // Key Exists

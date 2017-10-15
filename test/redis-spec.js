@@ -49,12 +49,6 @@ describe("Redis Unit Testing", function() {
                 expect(scard_results).to.above(0);
             });
         });
-        
-        describe("SEXISTSSync()", function() {
-            it('should return a boolean value');
-
-            it('should return true for example data');
-        });
 
         describe("SISMEMBERSync( set : string, member : string )", function(){
 
@@ -135,11 +129,24 @@ describe("Redis Unit Testing", function() {
         });
 
         describe('HSETSync', function() {
-            it('should return a boolean');
+            it('should return a boolean', async function() {
+                var hset_result = await spec.HSETSync('hashTest', 'field1', 'value1');
 
-            it('should add a value to a hash key to Redis');
+                expect(hset_result).to.be.a('boolean');
+            });
 
-            it('should add a value to the hash key');
+            it('should add a value to a hash key to Redis', async function(done) {
+                var hset_result = await spec.HSETSync('addKey', 'key', 'value');
+
+                this.client.EXISTS('addKey', (err, res) => {
+                    if(err) { done(err); }
+                    else if(res == 0){ done(new Error("Incorrect Value")); }
+                    else if(res == 1){ done(); }
+                });
+
+            });
+
+            it('should add a value to the hash field');
 
         });
 

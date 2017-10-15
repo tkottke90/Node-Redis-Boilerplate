@@ -262,13 +262,12 @@ module.exports = {
             SISMEMBERSync(key, value){
                 return new Promise((resolve, reject) => {
                     // Get list of members
-                    client.SISMEMBER(key,(err, res) => {
+                    client.SISMEMBER(key, value,(err, res) => {
                         if(err){
                             // Handle Error
                             smc.getMessage(1,0,`SISMEMBER Error: \r\nkey: ${key} value:${value} \r\n${err}`);
                             reject(err);
                         } else {
-                            console.log(res);
                             res == 0 ? resolve(false) : resolve(true);                  
                         }
                     });

@@ -7,6 +7,24 @@ var spec = rewire("../app_modules/redis-module");
 var redisMock = require("redis-mock");
 
 describe("Redis Unit Testing", function() {
+    describe("Redis Core Sync Functions", function() {
+        
+        before(function() {
+            this.client = redisMock.createClient();
+            spec.__set__("client", this.client);
+
+            spec.SADDSync('core', 'value');
+        });
+
+        describe("EXISTSync", function() {
+            it('should return true if key is listed', async function() {
+                var exists_result = await spec.EXISTSync('core');
+
+                expect(exists_result).to.equal(true);
+            });
+        });        
+    });
+
     describe("Redis Set Sync Functions", function () {
         
         before(function() {
@@ -73,6 +91,8 @@ describe("Redis Unit Testing", function() {
 
         before(function() {
             
+
+
             spec.SADDSync('test2', 'one');
             spec.SADDSync('test2', 'two');
             spec.SADDSync('test2', 'tree');
@@ -128,26 +148,53 @@ describe("Redis Unit Testing", function() {
 
         });
 
-        describe('HSETSync', function() {
+        describe('HSETSync()', function() {
             it('should return a boolean', async function() {
                 var hset_result = await spec.HSETSync('hashTest', 'field1', 'value1');
 
                 expect(hset_result).to.be.a('boolean');
             });
 
-            it('should add a value to a hash key to Redis', async function(done) {
-                var hset_result = await spec.HSETSync('addKey', 'key', 'value');
-
-                this.client.EXISTS('addKey', (err, res) => {
-                    if(err) { done(err); }
-                    else if(res == 0){ done(new Error("Incorrect Value")); }
-                    else if(res == 1){ done(); }
+            it('should add key to Redis if one does not exist', function(done) {
+                this.client.EXISTS('hashTest', (err, res) => {
+                    if(err) done(err);
+                    else if(res == 0) done(new Error("Hash Not Found - Error:0"));
+                    else if(res == 1) done();
+                    else done(new Error(`Error: Bad Results - ${res}`));
                 });
-
             });
 
-            it('should add a value to the hash field');
+            it('should add a field to the key', function(done){
+                this.client.HEXISTS('hashTest', 'field1',(err, res) => {
+                    if(err) done(err);
+                    else if(res == 0) done(new Error("Field Not Found"));
+                    else done();
+                });
+            });
 
+            it('should add a value to the field', function(done){
+                this.client.HGET('hashTest', 'field1', (err, res) => {
+                    if(err) done(err);
+                    else if(res == null) done(new Error("No Value Assigned - Error Null"));
+                    else if(res === 'value1') done();
+                    else done(new Error(`Error: Bad Results - ${res}`))
+                });
+            });
+
+        });
+
+        describe('HEXISTSSync()', function() {
+            it('should return a boolean', async function() {
+                var hexists_result = await spec.HEXISTSSync('hashTest', 'field1');
+
+                expect(hexists_result).to.be.a('boolean');
+            });
+
+            it('should return true if the field exists in the key', async function() {
+                var hexists_result = await spec.HEXISTSSync('hashTest', 'field1');
+
+                expect(hexists_result).to.equal(true);
+            });
         });
 
         describe('HGETSync()', function() {

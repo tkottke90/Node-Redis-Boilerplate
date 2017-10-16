@@ -210,6 +210,20 @@ module.exports = {
         },
     
     // Redis Sync Functions
+        // Core
+            EXISTSync(key){
+                return new Promise((resolve, reject) => {
+                    client.EXISTS(key, (err, res) => {
+                        if(err){
+                            smc.getMessage(1,0,`Redis EXISTS Error: ${err}`);
+                            reject(err);
+                        } else {
+                            res == 0 ? resolve(false) : resolve(true);
+                        }
+                    });
+                })
+            },
+
 
         // Sets
             /**
@@ -322,33 +336,32 @@ module.exports = {
                     });
                 });
             },
-            // Add Field
 
             // Key Exists
-                // HEXISTSSync(key, field){
-                //     return new Promise((resolve, reject) => {
-                //         client.HEXISTS(key, field, (err, res) => {
-                //             if(err){
-                //                 reject(err);
-                //             } else {
-                //                 res == 0 ? resolve(false) : resolve(true);
-                //             }
-                //         });
-                //     });
-                // },
+                HEXISTSSync(key, field){
+                    return new Promise((resolve, reject) => {
+                        client.HEXISTS(key, field, (err, res) => {
+                            if(err){
+                                reject(err);
+                            } else {
+                                res == 0 ? resolve(false) : resolve(true);
+                            }
+                        });
+                    });
+                },
             
             // Hash Length
-                // HLENSync(key){
-                //     return new Promise((resolve, reject) => {
-                //         client.HLEN(key, (err, res) => {
-                //             if(err){
-                //                 reject(err);
-                //             } else {
-                //                 resolve(res);
-                //             }
-                //         });
-                //     });
-                // },
+                HLENSync(key){
+                    return new Promise((resolve, reject) => {
+                        client.HLEN(key, (err, res) => {
+                            if(err){
+                                reject(err);
+                            } else {
+                                resolve(res);
+                            }
+                        });
+                    });
+                },
 
     // RESTful
         // GET
@@ -729,32 +742,6 @@ module.exports = {
                 }
             });
         }
-    }
-
-
-
-    function HEXISTSSync(key, field){
-        return new Promise((resolve, reject) => {
-            client.HEXISTS(key, field, (err, res) => {
-                if(err){
-                    reject(err);
-                } else {
-                    res == 0 ? resolve(false) : resolve(true);
-                }
-            });
-        });
-    }
-
-    function HLENSync(key){
-        return new Promise((resolve, reject) => {
-            client.HLEN(key, (err, res) => {
-                if(err){
-                    reject(err);
-                } else {
-                    resolve(res);
-                }
-            });
-        });
     }
 
 // Notes

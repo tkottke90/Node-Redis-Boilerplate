@@ -90,14 +90,7 @@
     async function test(){
         smc.getMessage(0,null,"Test Function \n\n");
 
-        var t = await redis.SISMEMBERSync('testSet', 'one');
-        var tf = await redis.SISMEMBERSync('testSet', 'one');
-
-        console.log(
-            `
-                Test: ${t}
-                Test Failure: ${tf}
-            `);
+        console.log(`Results: ${await redis.EXISTSync('Admin')}`);
 
         smc.getMessage(0,null,"End of Test");
         process.exit();

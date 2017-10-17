@@ -323,20 +323,6 @@ module.exports = {
             },
 
         // Hash
-            // Add Key
-            HSETSync(key, field, value){
-                return new Promise((resolve, reject) => {
-                    client.HSET(key, field, value, (err, res) => {
-                        if(err){
-                            smc.getMessage(1,0,`HSET: ${err}`);
-                            reject(err);
-                        } else {
-                            res == 0 ? resolve(false) : resolve(true);
-                        }
-                    });
-                });
-            },
-
             // Key Exists
                 HEXISTSSync(key, field){
                     return new Promise((resolve, reject) => {
@@ -350,6 +336,32 @@ module.exports = {
                     });
                 },
             
+            // Get Value
+                HGETSync(key, field){
+                    return new Promise((resolve, reject) => {
+                        client.HGET(key, field, (err, res) => {
+                            if(err){
+                                reject(err);
+                            } else {
+                                resolve(res);
+                            }
+                        });
+                    });
+                },
+
+            // Get All Values
+                HGETALLSync(key){
+                    return new Promise((resolve, reject) => {
+                        client.HGETALL(key, (err, res) => {
+                            if(err){
+                                reject(err);
+                            } else {
+                                resolve(res);
+                            }
+                        });
+                    });
+                },    
+
             // Hash Length
                 HLENSync(key){
                     return new Promise((resolve, reject) => {
@@ -363,6 +375,19 @@ module.exports = {
                     });
                 },
 
+            // Add Key
+                HSETSync(key, field, value){
+                    return new Promise((resolve, reject) => {
+                        client.HSET(key, field, value, (err, res) => {
+                            if(err){
+                                smc.getMessage(1,0,`HSET: ${err}`);
+                                reject(err);
+                            } else {
+                                res == 0 ? resolve(false) : resolve(true);
+                            }
+                        });
+                    });
+                },
     // RESTful
         // GET
 

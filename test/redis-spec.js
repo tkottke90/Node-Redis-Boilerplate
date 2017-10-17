@@ -193,20 +193,40 @@ describe("Redis Unit Testing", function() {
             it('should return true if the field exists in the key', async function() {
                 var hexists_result = await spec.HEXISTSSync('hashTest', 'field1');
 
-                expect(hexists_result).to.equal(true);
+                expect(hexists_result).to.be.true;
             });
         });
 
         describe('HGETSync()', function() {
-            it('should return a string value');
+            it('should return a string value', async function() {
+                var hget_result = await spec.HGETSync('hashTest', 'field1');
 
-            it('should get a value from a hash key');
+                expect(hget_result).to.be.a('string');
+            });
+
+            it('should get a value from a hash key', async function() {
+                var hget_result = await spec.HGETSync('hashTest', 'field1');
+                
+                expect(hget_result).to.equal('value1');
+            });
+        });
+
+        before(async function() {
+            await spec.HSETSync('hashTest', 'field2', 'value2');
         });
 
         describe('HGETALLSync()', function() {
-            it('should return an array of values');
+            it('should return a JSON object', async function() {
+                var hgetall_result = await spec.HGETALLSync('hashTest');
 
-            it('should get all values in a hash key');
+                expect(hgetall_result).to.be.a('object');
+            });
+
+            it('should get all values in a hash key', async function() {
+                var hgetall_result = await spec.HGETALLSync('hashTest');
+                
+                expect(hgetall_result).to.includes({'field1':'value1','field2':'value2'});
+            });
         });
 
         describe('HLENSync()', function() {

@@ -90,7 +90,7 @@
     async function test(){
         smc.getMessage(0,null,"Test Function \n\n");
 
-        console.log(`Results: ${await redis.EXISTSync('Admin')}`);
+        console.log(`Results: ${JSON.stringify(await redis.HGETALLSync('key'))}`);
 
         smc.getMessage(0,null,"End of Test");
         process.exit();

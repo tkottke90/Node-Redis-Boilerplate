@@ -90,7 +90,7 @@
     async function test(){
         smc.getMessage(0,null,"Test Function \n\n");
 
-        console.log(`Results: ${JSON.stringify(await redis.HGETALLSync('key'))}`);
+        console.log(`Results: ${await redis.HLENSync('key')}`);
 
         smc.getMessage(0,null,"End of Test");
         process.exit();

@@ -258,15 +258,46 @@ describe("Redis Unit Testing", function() {
         });
 
         describe('HVALSync()', function() {
-            it('should return an array');
+            it('should return an array', async function() {
+                var hval_result = await spec.HVALSync('hashTest');
 
-            it('should return a list of the values listed in the hash')
+                expect(hval_result).to.be.an('array');
+            });
+
+            it('should return a list of the values listed in the hash', async function() {
+                var hkey_result = await spec.HVALSync('hashTest');
+
+                expect(hkey_result).to.eql([ 'value2' , 'value1' ]);
+            })
         });
 
         describe('HDELSync()', function() {
-            it('should return a boolean');
+            it('should return a boolean', async function() {
+                var hdel_result = await spec.HDELSync('hashTest', 'field1');
 
-            it('should return true if item is deleted');
+                expect(hdel_result).to.be.a('boolean');
+            });
+
+            it('should return true if item is deleted', async function() {
+                var hdel_result = await spec.HDELSync('hashTest', 'field2');
+
+                expect(hdel_result).to.equal(true);
+            });
+
+            it('should remove the hash key if all fields are removed', function(done) {
+                this.client.EXISTS('hashTest', (err, res) => {
+                    if(err) { 
+                        done(err); 
+                    } else if(res == 1) {
+                        this.client.HGETALL('hashTest', (err, res) => {
+                            done(new Error(`Remaining Data: ${res}`));
+                        });
+                        
+                    } else {
+                        done();
+                    }
+                });
+            });
         });
     });
 });

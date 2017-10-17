@@ -324,13 +324,25 @@ module.exports = {
 
         // Hash
             // Delete Fields
-                
+                HDELSync(key, field){
+                    return new Promise((resolve, reject) => {
+                        client.HDEL(key, field, (err, res) => {
+                            if(err){
+                                smc.getMessage(1,0,`HDEL Error: ${err}`);
+                                reject(err);
+                            } else {
+                                res == 0 ? resolve(false) : resolve(true);
+                            }
+                        });
+                    });
+                },
 
             // Key Exists
                 HEXISTSSync(key, field){
                     return new Promise((resolve, reject) => {
                         client.HEXISTS(key, field, (err, res) => {
                             if(err){
+                                smc.getMessage(1,0,`HEXISTS Error: ${err}`);
                                 reject(err);
                             } else {
                                 res == 0 ? resolve(false) : resolve(true);
@@ -344,6 +356,7 @@ module.exports = {
                     return new Promise((resolve, reject) => {
                         client.HGET(key, field, (err, res) => {
                             if(err){
+                                smc.getMessage(1,0,`HGET Error: ${err}`);
                                 reject(err);
                             } else {
                                 resolve(res);
@@ -357,6 +370,7 @@ module.exports = {
                     return new Promise((resolve, reject) => {
                         client.HGETALL(key, (err, res) => {
                             if(err){
+                                smc.getMessage(1,0,`HGETALL Error: ${err}`);
                                 reject(err);
                             } else {
                                 resolve(res);
@@ -370,6 +384,7 @@ module.exports = {
                     return new Promise((resolve, reject) => {
                         client.HKEYS(key, (err, res) => {
                             if(err){
+                                smc.getMessage(1,0,`HKEYS Error: ${err}`);
                                 reject(err);
                             } else {
                                 resolve(res);
@@ -383,6 +398,7 @@ module.exports = {
                     return new Promise((resolve, reject) => {
                         client.HLEN(key, (err, res) => {
                             if(err){
+                                smc.getMessage(1,0,`HLEN Error: ${err}`);
                                 reject(err);
                             } else {
                                 resolve(res);
@@ -396,7 +412,7 @@ module.exports = {
                     return new Promise((resolve, reject) => {
                         client.HSET(key, field, value, (err, res) => {
                             if(err){
-                                smc.getMessage(1,0,`HSET: ${err}`);
+                                smc.getMessage(1,0,`HSET Error: ${err}`);
                                 reject(err);
                             } else {
                                 res == 0 ? resolve(false) : resolve(true);
@@ -404,14 +420,20 @@ module.exports = {
                         });
                     });
                 },
-    // RESTful
-        // GET
 
-        // PUT
-
-        // POST
-
-        // DELETE       
+            // Get List of Values
+                HVALSync(key){
+                    return new Promise((resolve, reject) => {
+                        client.HVALS(key, (err, res) => {
+                            if(err){
+                                smc.getMessage(1,0,`HVAL Error: ${err}`)
+                                reject(err);
+                            } else {
+                                resolve(res);
+                            }
+                        });
+                    });
+                }
 }
 
 // Module Local Functions

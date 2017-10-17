@@ -2,3 +2,4 @@ node_modules/
 resources/
 app_modules/config
 .vs/
+.nyc_output/

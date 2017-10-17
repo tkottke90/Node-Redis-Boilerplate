@@ -230,21 +230,43 @@ describe("Redis Unit Testing", function() {
         });
 
         describe('HLENSync()', function() {
-            it('should return an a number');
+            it('should return an a number', async function() {
+                var hlen_result = await spec.HLENSync('hashTest');
 
-            it('should return the number of values in the set');
+                expect(hlen_result).to.be.a('number');
+            });
+
+            it('should return the number of values in the set', async function() {
+                var hlen_result = await spec.HLENSync('hashTest');
+
+                expect(hlen_result).to.equal(2);
+            });
         });
 
         describe('HKEYSync()', function() {
-            it('should return a array');
+            it('should return a array', async function() {
+                var hkey_result = await spec.HKEYSync('hashTest');
 
-            it('should return a list of keys listed in the hash');
+                expect(hkey_result).to.be.an('array');
+            });
+
+            it('should return a list of keys listed in the hash', async function() {
+                var hkey_result = await spec.HKEYSync('hashTest');
+
+                expect(hkey_result).to.eql([ 'field2', 'field1' ]);
+            });
         });
 
         describe('HVALSync()', function() {
             it('should return an array');
 
             it('should return a list of the values listed in the hash')
+        });
+
+        describe('HDELSync()', function() {
+            it('should return a boolean');
+
+            it('should return true if item is deleted');
         });
     });
 });

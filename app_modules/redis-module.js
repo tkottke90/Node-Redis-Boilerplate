@@ -323,6 +323,9 @@ module.exports = {
             },
 
         // Hash
+            // Delete Fields
+                
+
             // Key Exists
                 HEXISTSSync(key, field){
                     return new Promise((resolve, reject) => {
@@ -362,6 +365,19 @@ module.exports = {
                     });
                 },    
 
+            // Get List of Keys
+                HKEYSync(key){
+                    return new Promise((resolve, reject) => {
+                        client.HKEYS(key, (err, res) => {
+                            if(err){
+                                reject(err);
+                            } else {
+                                resolve(res);
+                            }
+                        });
+                    });
+                },
+
             // Hash Length
                 HLENSync(key){
                     return new Promise((resolve, reject) => {
@@ -375,7 +391,7 @@ module.exports = {
                     });
                 },
 
-            // Add Key
+            // Add Hash/Field
                 HSETSync(key, field, value){
                     return new Promise((resolve, reject) => {
                         client.HSET(key, field, value, (err, res) => {
@@ -395,244 +411,7 @@ module.exports = {
 
         // POST
 
-        // DELETE
-
-    // Auth Functions
-        // Add New Client Request to Queue
-            reqClient( name , email , password){
-                return new Promise(function(resolve,reject){
-                    // Get Number of Reqests
-                    client.SCARD('client_req',function(err,count){
-                        // Handle Errors
-                        if(err){ smc.getMessage(1,5,`Error Getting client_req count: \n  ${err}`); reject(err); }
-
-                        // Encrypt Password
-                        password = bcrypt.hashSync(password,8);
-
-                        // Create Request Object
-                        var date = new Date().valueOf();
-                        var request = {};
-                        request = 
-                        {
-                            "req_ID" : count,    
-                            "status" : 1,
-                            "req_date" : date,
-                            "info" : {
-                                "name" : name,
-                                "email" : email,
-                                "password" : password
-                            }
-
-                        };
-
-                        
-                        // Add Request to request lists
-                        client.SADD('client_req', JSON.stringify(request), function(err){
-                            if(err){ smc.getMessage(1,5,`Error Adding Request: \n  ${err}`); reject(err,null); }
-                            else { 
-                                smc.getMessage(1,7,`Client Request Made`)
-                                resolve(true); 
-                            }
-                        });
-                    });
-                });
-            },
-        // Get Client Requests List
-            /**
-             * Returns a list of pending client requests
-             * @returns {string} Array of requestIDs
-             */
-            getClientReq(){
-                return new Promise((resolve, reject) => {
-                    // Get Info from DB
-                    client.SMEMBERS('client_req', function (err, data){
-                        if(err){ smc.getMessage(1,5,`Error Getting client_req list: \n  ${err}`); reject(err); }
-                        else { resolve(data); }
-                    });
-                });
-            },
-
-        // Get Client Request Info Based on ID
-            getClientReqInfo(requestID){
-                return new Promise((resolve, reject) => {
-                    client.SMEMBERS('client_req', function(err, data){
-                        if(err){
-                            reject(err);
-                        }
-
-                        for(var i = 0; i < data.length; i++){
-                            // Convert to JSON Object
-                            var clientJSON = JSON.parse(data[i]);
-                            // Get Request Key from JSON
-                            var reqID = clientJSON["req_ID"];
-                            if(requestID == reqID){
-                                resolve(clientJSON);
-                            }
-                        }
-
-                        // If no request ID found, reject with no id found
-                        reject(JSON.stringify(
-                            {
-                                "message" : `No ID of ${requestID} found`
-                            }
-
-                        ));
-                    });
-                });
-            },
-
-        // Approve Client Reqeust
-            addClient(requestID){
-                return new Promise((resolve, reject) => {
-                    // Check Request ID Exists
-                    client.SMEMBERS('client_req', function(err, data){
-                        // Handle Err
-                        if(err){ 
-                            reject(err); 
-                        }
-                        // Iterate through requests
-                        for(var i = 0; i < data.length; i++){
-                            // Conver JSON Object
-                            var clientJson = JSON.parse(data[i]);
-                            // Get reqest key from JSON
-                            var reqID = clientJson["req_ID"];
-                            // Compare to requestID argument
-                            if(requestID == reqID){ 
-                                // Generate Client GUID
-                                    var newGUID = genGUID();
-                                // Set Account Type
-                                    var account = "developer"
-
-                                var user = 
-                                {
-                                    "first_name" : clientJson["info"]["name"].split(' ')[0],
-                                    "last_name" : clientJson["info"]["name"].split(' ')[1],
-                                    "email" : clientJson["info"]["email"],
-                                    "security" : {
-                                        "password" : clientJson["info"]["password"]
-                                    },
-                                    "account" : account,
-                                    "data" : "",
-                                    "tokens" : ""
-                                }
-
-                                // Update Request Lists
-                                // await client.SREM("client_req", data[i],(err, res) => {
-                                //     if(err){
-                                        
-                                //     } else {
-
-                                //     }
-                                // });
-
-                                client.HSET("reg_clients",newGUID,JSON.stringify(user),function(err){
-                                    if(err){ 
-                                        smc.getMessage(1,5,`Error Adding Client: \n  ${err}`); 
-                                        reject(err); 
-                                    } else { 
-                                        resonse("OK"); 
-                                    }
-                                }); 
-                                break;
-                            }
-                        }
-                    }); 
-                
-                });
-
-                function genGUID(){
-                    var guid = ['',''];
-                    
-                    for(var i = 0; i < 2; i++){
-                        while(guid[i].length < 8){
-                            guid[i] += Math.random().toString(16).substring(2);
-                        }
-                    }
-                    return `${guid[0]}-${guid[1]}`
-                }
-
-                function response(err, res) {
-                    if(typeof callback === "function"){ return callback(err,res); }
-                    else { return err != null ? err : res } 
-                }
-            },
-
-        // Check if Client Exists
-            /**
-             * Function returns if a client with 'clientGUID' exists in the database
-             * @param {string} clientGUID 
-             * @returns {Promise}
-             */
-            clientExistsByGUID(clientGUID){
-                return new Promise((resolve,reject) => {
-                    client.HEXISTS('reg_clients',clientGUID, function(err, res){
-                        if(err){ 
-                            smc.getMessage(1,5,`Error in HEXISTS:: \n${err}`); 
-                            reject(false); 
-                        }
-                        else{ resolve(res); }
-                    });
-                });
-            }, 
-
-            /**
-             * Function returns if a client with username exists in the database
-             * @param {string} clientGUID 
-             * @returns {Promise}
-             */
-            clientExistsByUsername(clientUsername){
-                return new Promise((resolve, reject) => { 
-                    client.HVALS("reg_clients", function(err, data){
-                        if(err){ smc.getMessage(1,5,`Error in HVALS request for Users: \n${err}`); reject(err); }
-                        var values = data;
-
-                        // Check for user email that matches
-                        for(var i = 0; i < values.length; i++){
-                            var user = JSON.parse(values[i]);
-                            if(clientUsername == user["email"]){ resolve(true);}
-                        }
-
-                        // No User Found
-                        resolve(false);
-                    });
-                });
-            },
-
-        // Add New Datastore Request to Queue
-            reqDatastore(userGUID, projectName){
-                return new Promise((resolve, reject) => {
-                
-                    var projectID = HLENSync("data_req") + 1;
-                    var date = new Date().valueOf();
-                    var request = {
-                        "proID" : projectID,
-                        "req_date" : date,
-                        "project_name" : projectName,
-                        "client_GUID" : userGUID,
-                        "status" : 1
-                    };
-
-                    resolve(request);
-                    
-
-                    // client.HSET("data_req",projectID, JSON.stringify(request),(err, res) => {
-                    //     if(err){
-                    //         reject(err);
-                    //     } else {
-                    //         resolve(res);
-                    //     }
-                    // });
-                });            
-            },
-
-        // New Datastore
-            // Required Information: Project Name, Client Info, 
-            // Returns
-            genKey(){
-
-            }
-        
-        
+        // DELETE       
 }
 
 // Module Local Functions

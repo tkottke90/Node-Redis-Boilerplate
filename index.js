@@ -11,8 +11,7 @@
     //const bcrypt = require('bcrypt');    
     const smc = require('./app_modules/server-message-creator.js');
     const redis = require('./app_modules/redis-module.js');
-    const redis_sync = require('./app_modules/redis-sync.js');
-    const auth = require('./app_modules/oauth-module.js');
+    const auth = require('./app_modules/auth-module.js');
 
 // Variables
     var root = '';
@@ -52,36 +51,10 @@
         redis.startRedis();
 
         // Test 
-        setTimeout(
-            () => {
-                test()
-            }
-        ,100);
-
-        // redis.reqClient("Thomas Kottke", "t.kottke90@gmail.com", "12345", function(err){
-        //     redis.getClientReq(function(err,res){
-        //         console.log(res);
-        //     });
-        // });
-
-        //redis.addClient(0);
- 
         
-
-        // redis.clientExistsByUsername("t.kottke90@gmail.com")
-        //     .then((result) => { 
-        //         console.log(result); 
-                
-            
-        //     })
-        //     .catch((err) => { console.log(err); });
-
-        /*
-            redis.clientExistsByUsername("t.kottke()@gmail.com", function (err, result){
-                if(err) { <Log Err> }
-                else{ console.log(result) }
-            }):
-        */
+        test();
+        
+        
         
         // End Test
 
@@ -90,7 +63,15 @@
     async function test(){
         smc.getMessage(0,null,"Test Function \n\n");
 
-        console.log(`Results: ${await redis.HLENSync('key')}`);
+        console.log(`Results: ${await redis.HSETSync('hashTest', 'field1', 'value1')}`);
+        console.log(`Results: ${await redis.HSETSync('hashTest', 'field2', 'value2')}`);
+
+        console.log(`Results: ${await redis.HLENSync('hashTest')}`);
+
+        console.log(`Results: ${await redis.HDELSync('hashTest', 'field1')}`);
+        console.log(`Results: ${await redis.HDELSync('hashTest', 'field2')}`);
+
+        console.log(`Results: ${await redis.EXISTSync('hashTest')}`);
 
         smc.getMessage(0,null,"End of Test");
         process.exit();

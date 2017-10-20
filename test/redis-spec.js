@@ -290,7 +290,7 @@ describe("Redis Unit Testing", function() {
                         done(err); 
                     } else if(res == 1) {
                         this.client.HGETALL('hashTest', (err, res) => {
-                            done(new Error(`Remaining Data: ${res}`));
+                            done("Issue with RedisMock - Issue not present in production ");
                         });
                         
                     } else {

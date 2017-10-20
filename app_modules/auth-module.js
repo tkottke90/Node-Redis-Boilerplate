@@ -11,10 +11,10 @@ var templates = {
     req_API : ""
 };
 
-module.exports = {
-    addClientReq : addClientReq,
-    authAPI : authAPI
-}
+// module.exports = {
+//     addClientReq : addClientReq,
+//     authAPI : authAPI
+// }
 
 // New Client/Datastore Functions
     // Add New Client Request to Queue
@@ -35,9 +35,17 @@ module.exports = {
 // Authorization Functions
     // Check if API Key is Valid  
         var authAPI = async function( APIkey ){
-            // Check for API Key
             var result =  await redis.EXISTSync(APIkey);
             return result;
         };
 
     // Check if Client Exists
+
+
+module.exports = {
+    addClientReq(){},
+    async authAPI(){
+        var result =  await redis.EXISTSync(APIkey);
+        return result;
+    }
+}

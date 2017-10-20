@@ -2,11 +2,17 @@ var expect = require("chai").expect;
 var rewire = require("rewire");
 var sinon = require("sinon");
 
-var spec = rewire('../app_modules/auth-module');
-
-var redisMock = require("redis-mock");
+var auth = rewire('../app_modules/auth-module');
 
 describe("Authorization Testing", function() {
+    beforeEach(function() {
+        this.redisMock = {
+            EXISTSync : sinon.stub().yields(true)
+        }
+
+        auth.__set__("redis", this.redisMock);
+    });
+    
     describe("Client Datastore Requests", function() {
 
         describe("addClientReq()", function(){
@@ -49,18 +55,14 @@ describe("Authorization Testing", function() {
 
     describe("API Authorization", function () {
         beforeEach(function() {
-            this.redis = {
-                EXISTSync : sinon.stub().yields(true)
-            };
 
-            spec.__set__("redis", this.redis);
+            auth.authAPI('testKey');
+
         });
 
         describe("authAPI()", function(){
-            it('should return true if key exists', function(){
-                 var auth_result = spec.authAPI('testKey');
-
-                expect(auth_result).to.equal(true);
+            it('calls authAPI with the correct key', function(){                
+                expect(this.redis.EXISTSync.calledWith('testKey')).to.equal(true);
             });
         });
     });

@@ -11,18 +11,20 @@ var templates = {
     req_API : ""
 };
 
-// module.exports = {
-//     addClientReq : addClientReq,
-//     authAPI : authAPI
-// }
+module.exports = {
+    addClientReq(name, email, password){
+        return Promise((resolve, reject) => {
+
+        });
+    }, 
+    async authAPI( APIkey ){
+        var apiExists = await redis.EXISTSync(APIkey);
+        resolve(apiExists);
+    } 
+}
 
 // New Client/Datastore Functions
     // Add New Client Request to Queue
-        var addClientReq = function(name, email, password){
-            return Promise((resolve, reject) => {
-
-            });
-        };
     // Get Client Requests List
 
     // Get Client Request Info Based on ID
@@ -34,18 +36,5 @@ var templates = {
     // New API
 // Authorization Functions
     // Check if API Key is Valid  
-        var authAPI = async function( APIkey ){
-            var result =  await redis.EXISTSync(APIkey);
-            return result;
-        };
 
     // Check if Client Exists
-
-
-module.exports = {
-    addClientReq(){},
-    async authAPI(){
-        var result =  await redis.EXISTSync(APIkey);
-        return result;
-    }
-}

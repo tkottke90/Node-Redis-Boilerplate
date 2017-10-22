@@ -54,24 +54,15 @@
         
         test();
         
-        
-        
         // End Test
 
     }); 
 
     async function test(){
-        smc.getMessage(0,null,"Test Function \n\n");
+        smc.getMessage(0,null,"Test Function \n");
 
-        console.log(`Results: ${await redis.HSETSync('hashTest', 'field1', 'value1')}`);
-        console.log(`Results: ${await redis.HSETSync('hashTest', 'field2', 'value2')}`);
-
-        console.log(`Results: ${await redis.HLENSync('hashTest')}`);
-
-        console.log(`Results: ${await redis.HDELSync('hashTest', 'field1')}`);
-        console.log(`Results: ${await redis.HDELSync('hashTest', 'field2')}`);
-
-        console.log(`Results: ${await redis.EXISTSync('hashTest')}`);
+        auth.authAPI('Admin').then((result) => { console.log(`Result: ${result}`); });
+        console.log(`Result: ${await redis.EXISTSync('Admin')}`);
 
         smc.getMessage(0,null,"End of Test");
         process.exit();

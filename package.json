@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "mocha": "nyc mocha --exit"
+    "mocha": "nyc mocha"
   },
   "keywords": [],
   "author": "",

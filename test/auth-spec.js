@@ -5,13 +5,6 @@ var sinon = require("sinon");
 var auth = rewire('../app_modules/auth-module');
 
 describe("Authorization Testing", function() {
-    beforeEach(function() {
-        this.redisMock = {
-            EXISTSync : sinon.stub().yields(true)
-        }
-
-        auth.__set__("redis", this.redisMock);
-    });
     
     describe("Client Datastore Requests", function() {
 
@@ -54,16 +47,35 @@ describe("Authorization Testing", function() {
     });
 
     describe("API Authorization", function () {
-        beforeEach(function() {
-
-            auth.authAPI('testKey');
-
-        });
 
         describe("authAPI()", function(){
-            it('calls authAPI with the correct key', function(){                
-                expect(this.redis.EXISTSync.calledWith('testKey')).to.equal(true);
+            beforeEach(function() {
+                this.redisMock = {
+                    EXISTSync : sinon.stub().resolves(true)
+                }
+
+                auth.__set__("redis", this.redisMock);
+
+                auth.authAPI('testKey');
+
             });
+
+            it('calls authAPI with the correct key', function(){                
+                expect(this.redisMock.EXISTSync.calledWith('testKey')).to.equal(true);
+            });
+
+            it('should return true if key exists', function() {
+                auth.authAPI('testKey')
+                    .then((result) => {
+                        if(typeof result != 'boolean'){
+                            expect(result).to.be.a('boolean');
+                        } else {
+                            expect(result).to.equal(true);
+                        }    
+                    })
+                    .catch((err) => { expect(err).to.throw(); });
+            });
+
         });
     });
     

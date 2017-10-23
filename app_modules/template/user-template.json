@@ -1,0 +1,11 @@
+{
+    "email" : "",
+    "passwords" : {
+        "password" : "",
+        "salt" : ""
+    },
+    "logs" : {
+        "log" : {},
+        "security" : {}
+    }
+}

@@ -9,6 +9,12 @@ describe("Authorization Testing", function() {
     describe("Client Datastore Requests", function() {
 
         describe("addClientReq()", function(){
+            before(function() {
+                
+            });
+
+            it('should check if email already in use');
+
             it('should return true if request added');
         });
 

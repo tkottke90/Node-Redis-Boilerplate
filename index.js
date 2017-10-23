@@ -62,7 +62,7 @@
         smc.getMessage(0,null,"Test Function \n");
 
         auth.authAPI('Admin').then((result) => { console.log(`Result: ${result}`); });
-        console.log(`Result: ${await redis.EXISTSync('Admin')}`);
+        //console.log(`Result: ${await redis.EXISTSync('Admin')}`);
 
         smc.getMessage(0,null,"End of Test");
         process.exit();

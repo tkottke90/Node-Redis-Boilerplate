@@ -54,6 +54,7 @@
         
         test();
         
+
         // End Test
 
     }); 
@@ -61,7 +62,11 @@
     async function test(){
         smc.getMessage(0,null,"Test Function \n");
 
-        auth.authAPI('Admin').then((result) => { console.log(`Result: ${result}`); });
+        var addClient = await auth.addClientReq('Example Test', 'e.test', "12345");
+
+        console.log(addClient);
+
+        //auth.authAPI('Admin').then((result) => { console.log(`Result: ${result}`); });
         //console.log(`Result: ${await redis.EXISTSync('Admin')}`);
 
         smc.getMessage(0,null,"End of Test");

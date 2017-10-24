@@ -5,17 +5,33 @@ var sinon = require("sinon");
 var auth = rewire('../app_modules/auth-module');
 
 describe("Authorization Testing", function() {
-    
+
     describe("Client Datastore Requests", function() {
 
         describe("addClientReq()", function(){
-            before(function() {
-                
+            before(async function() {
+                // this.redisMock = {
+                //     SISMEMBERSync : sinon.stub().returns(false),
+                //     SADDSync: sinon.stub().yields()
+                // }
+
+                //auth.__set__("redis", this.redisMock);
+
+                sinon.stub(auth.redis,'SISMEMBERSync').resolves(true);
+                sinon.stub(auth.redis,'SAADDSync').resolves(true);
             });
 
-            it('should check if email already in use');
+            it('should return true if request added', function() {
+                auth.addClientReq('Example Test', 'e.test@example.com', "12345")
+                    .then((res) => {
+                        expect(res).to.equal(true);
+                    });
+            });
 
-            it('should return true if request added');
+            it('should check if email already in use', function() {
+                expect(this.redisMock.SISMEMBERSync.calledWith('e.test@example.com')).to.equal(true);
+            });
+
         });
 
         describe("getClientReqs()", function() {

@@ -13,44 +13,61 @@ var templates = {
     req_API : fs.readFileSync('./app_modules/template/req_data-template.json', "UTF-8"),
 };
 
-module.exports = {
-    addClientReq(name, email, password){
-        return new Promise((resolve, reject) => {
-            emailInUse(email).then((result) => {
-                if(!result) {
-                    var request = JSON.parse(templates.req_client);
-                    var salt = name.split(0,5);
-                    
-                    request.status = 1;
-                    request.req_Date = new Date();
-                    request.info.client_name = name;
-                    request.info.client_email = email;
-                    reqeust.info.client_password = password;
+var regExp = {
+    email : /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/
+}
 
-                    redis.SADDSync('req_client', JSON.stringify(request))
-                        .then((resolve) => {
-                           resolve(true);
-                        }).catch((err) => {
-                           smc.getMessage(1,0,`Error: ${err}`);
-                           reject(err);
-                        });
-                } else {
-                    reject(false);
-                }
-            }); 
-        });
+module.exports = {
+    async addClientReq(name, email, password){
+        return new Promise((resolve, reject) => {
+            if(!validEmail(email)){
+                resolve(false);
+            }
+            var inUse = emailInUse(email);
+            if(!inUse) {
+                var request = JSON.parse(templates.req_client);
+                var salt = name.split(0,5);
+
+                request.status = 1;
+                request.req_Date = new Date();
+                request.info.client_name = name;
+                request.info.client_password = password;
+                request.info.client_email = email;
+                redis.SADDSync('req_client', JSON.stringify(request))
+                     .then((add) => {
+                        add ? resolve(true) : resolve(false);
+                     });
+            } else {
+                resolve(false);
+            }
+        }); 
+        
     },
 
+    async addAPIReq(userGUID, apiName){
+        
+    },
 
+    async getClientReq(){},
 
+    async getClientReqByID(){},
+
+    async getAPIReq(){},
+
+    async getAPIReqByID(){},
+    
     async authAPI( APIkey ){
         var apiExists = await redis.EXISTSync(APIkey);
         return apiExists;
-    } 
+    }, 
 }
 
 function createUser(){
 
+}
+
+function validEmail(email){
+    return regExp.email.test(email);
 }
 
 function emailInUse(email){

@@ -17,53 +17,86 @@ var regExp = {
     email : /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/
 }
 
-module.exports = {
-    async addClientReq(name, email, password){
-        return new Promise((resolve, reject) => {
-            if(!validEmail(email)){
-                resolve(false);
+function addClientReq(name, email, password){
+    return new Promise(async (resolve, reject) => {
+        if(!validEmail(email)){
+            reject({ "Error" : "Invalid Email", "Method" : "addClientReq()", "Code" : 1});
+        }
+        var inUse = await emailInUse(email);
+        if(!inUse) {
+            var request = JSON.parse(templates.req_client);
+            var salt = name.split(0,5);
+
+            request.status = 1;
+            request.req_Date = new Date();
+            request.info.client_name = name;
+            request.info.client_password = password;
+            request.info.client_email = email;
+            
+            try {
+                var add = await redis.SADDSync('req_client', JSON.stringify(request));
+                resolve(add);
+            } catch(reject) {
+                reject({"Error" : reject, "Method" : "addAPIReq()", "Code" : 3})
             }
-            var inUse = emailInUse(email);
-            if(!inUse) {
-                var request = JSON.parse(templates.req_client);
-                var salt = name.split(0,5);
-
-                request.status = 1;
-                request.req_Date = new Date();
-                request.info.client_name = name;
-                request.info.client_password = password;
-                request.info.client_email = email;
-                redis.SADDSync('req_client', JSON.stringify(request))
-                     .then((add) => {
-                        add ? resolve(true) : resolve(false);
-                     });
-            } else {
-                resolve(false);
-            }
-        }); 
-        
-    },
-
-    async addAPIReq(userGUID, apiName){
-        
-    },
-
-    async getClientReq(){},
-
-    async getClientReqByID(){},
-
-    async getAPIReq(){},
-
-    async getAPIReqByID(){},
+            
+            redis.SADDSync('req_client', JSON.stringify(request))
+                    .then((add) => {
+                    add ? resolve(true) : resolve(false);
+                    });
+        } else {
+            reject({"Error" : "Email In Use By Another User", "Method" : "addCientReq()", "Code" : 2});
+        }
+    }); 
     
-    async authAPI( APIkey ){
-        var apiExists = await redis.EXISTSync(APIkey);
-        return apiExists;
-    }, 
 }
 
-function createUser(){
+function addAPIReq(userGUID, apiName){
+    return new Promise(async (resolve, reject) => {
+        var validGUID = validUser(userGUID);
+        if(validGUID){
+            var request = JSON.parse(templates.req_API);
 
+            request.status = 1;
+            request.req_date = new Date();
+            request.info.clientGUID = userGUID;
+            request.info.project_name = apiName;
+
+            try{
+                var add = await redis.SADDSync('req_api', JSON.stringify(request));
+                resolve(add);
+            } catch(reject) {
+                reject({"Error" : reject, "Method" : "addAPIReq()", "Code" : 2});
+            }
+
+        } else {
+            reject({"Error" : "No User Found", "Method" : "addAPIReq()", "Code" : 1});
+        }
+    });
+}
+
+function getClientReq(){}
+
+function getClientReqByID(){}
+
+function getAPIReq(){}
+
+function getAPIReqByID(){}
+
+// 
+
+async function authAPI( APIkey ){
+    try {
+        var result = await redis.EXISTSync(APIkey);
+        return result;
+    } catch(reject) {
+        return false;
+    }
+}
+
+function validUser(GUID){
+    var result = redis.EXISTSync(GUID);
+    return result;
 }
 
 function validEmail(email){
@@ -74,6 +107,12 @@ function emailInUse(email){
     var result = redis.SISMEMBERSync('taken_emails', email);
     return result;
 }
+
+
+module.exports.addClientReq = addClientReq;
+module.exports.addAPIReq = addAPIReq;
+
+module.exports.authAPI = authAPI;
 
 // New Client/Datastore Functions
     // Add New Client Request to Queue

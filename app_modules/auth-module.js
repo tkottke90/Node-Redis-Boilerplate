@@ -2,6 +2,7 @@
 
 var fs = require('fs');
 var crypto = require('crypto');
+var guid = require('guid');
 
 var redis = require('./redis-module'); 
 var smc = require('./server-message-creator');

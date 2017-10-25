@@ -1,4 +1,8 @@
 {
+    "name" : {
+        "first" : "",
+        "last" : ""
+    },
     "email" : "",
     "passwords" : {
         "password" : "",

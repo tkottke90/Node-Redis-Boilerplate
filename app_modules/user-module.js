@@ -2,6 +2,7 @@
 
 var fs = require('fs');
 var crypto = require('crypto');
+var guid =  require('guid');
 
 var redis = require('./redis-module'); 
 var smc = require('./server-message-creator');
@@ -13,9 +14,18 @@ var templates = {
 
 // Functions
 
-function generateGUID(){}
+function generateGUID(){
+    var newGUID =  guid.create();
+    return newGUID.toString();
+}
 
-function genEncyptPassword(){}
+function genEncyptPassword(password, salt){
+    var password = crypto.createHmac('sha512', password)
+                         .update(salt)
+                         .digest('hex');
+
+    return password;
+}
 
 function validUser(GUID){
     var result = redis.EXISTSync(GUID);
@@ -53,11 +63,6 @@ function addClientReq(name, email, password){
             } catch(reject) {
                 reject({"Error" : reject, "Method" : "addAPIReq()", "Code" : 3})
             }
-            
-            redis.SADDSync('req_client', JSON.stringify(request))
-                    .then((add) => {
-                    add ? resolve(true) : resolve(false);
-                    });
         } else {
             reject({"Error" : "Email In Use By Another User", "Method" : "addCientReq()", "Code" : 2});
         }
@@ -124,7 +129,43 @@ function delClientReq(reqID){
 }
 
 function createAccount(reqObject){
+    return new Promise(async (resolve, reject) => {
+        
+            var request = JSON.parse(reqObject);
+            var salt = request.info.client_name.slice(0,5);
+            var newName = request.info.client_name.split(' ');
+            var now = new Date();
 
+            var logs = {
+                log : {
+                    now : { "event" : "account created" }
+                },
+                security : {
+                    now : { "event" : "password reset", "notes" : "account setup" }
+                }
+            }
+
+            var passwords = {
+                "password" : genEncyptPassword(request.info.client_password, salt),
+                "salt" : salt
+            };
+
+            var GUID = generateGUID();
+        try {
+            var add = await redis.HSETSync(GUID,'email', request.info.client_email);
+            if(add){
+                await redis.HSETSync(GUID,'name', JSON.stringify({ "First" : newName[0], "Last" : newName[1] }));
+                await redis.HSETSync(GUID, 'passwords', JSON.stringify(passwords));
+                await redis.HSETSync(GUID, 'logs', JSON.stringify(logs));
+                resolve(true);
+            } else {
+                reject({"Error" : "Error Adding User", "Method" : "createAccount()", "Code" : 2})
+            }
+
+        } catch(err) {
+            reject({"Error" : err, "Method" : "createAccount()", "Code" : 1})    
+        }
+    });
 }
 
 // Exports
@@ -136,3 +177,5 @@ module.exports.getClientReqByID = getClientReqByID;
 module.exports.getClientReqByStatus = getClientReqByStatus;
 
 module.exports.delClientReq = delClientReq;
+
+module.exports.createAccount = createAccount;

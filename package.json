@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "mocha": "nyc mocha",
-    "test" : "node --inspect index.js"
+    "test": "node --inspect index.js"
   },
   "keywords": [],
   "author": "",
@@ -14,7 +14,9 @@
   "dependencies": {
     "body-parser": "^1.17.2",
     "express": "^4.15.3",
-    "redis": "^2.7.1"
+    "guid": "0.0.12",
+    "redis": "^2.7.1",
+    "uuid": "^3.1.0"
   },
   "devDependencies": {
     "chai": "^4.1.2",

@@ -66,8 +66,9 @@
 
         try {
             var client = await users.getClientReqByID(1);
-
-            console.log(client);
+            var addClient = await users.createAccount(client);
+            
+            console.log(`Created Client?: ${addClient}`);
 
         } catch(e) {
             smc.getMessage(0,5,JSON.stringify(e));

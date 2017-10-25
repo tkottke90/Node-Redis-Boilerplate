@@ -78,7 +78,7 @@ function getClientReqByID(listID){
     });
 }
 
-function getClientReqPending(){
+function getClientReqByStatus(status){
     return new Promise(async (resolve, reject) => {
         try {
             var clients = await redis.SMEMBERSSync('req_clients');
@@ -86,7 +86,7 @@ function getClientReqPending(){
 
             clients.forEach((client) => {
                 var clientJSON = JSON.parse(client);
-                if(clientJSON.status == 1){
+                if(clientJSON.status == status){
                     pendingClients.push(client);
                 }
             });
@@ -97,7 +97,6 @@ function getClientReqPending(){
         }
     });
 }
-
 
 
 // Exports

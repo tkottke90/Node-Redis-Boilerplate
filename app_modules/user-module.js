@@ -71,7 +71,7 @@ function getClientReqByID(listID){
     return new Promise(async (resolve, reject) => {
         try {
             var clients = await redis.SMEMBERSSync('req_clients');
-            resolve(client[listID]);
+            resolve(clients[listID]);
         } catch(err) {
             reject({"Error" : err, "Method" : "getClientReqByID()", "Code" : 1});
         }

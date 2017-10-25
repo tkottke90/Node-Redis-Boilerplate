@@ -37,7 +37,7 @@ function validEmail(email){
 }
 
 function emailInUse(email){
-    var result = redis.SISMEMBERSync('taken_emails', email);
+    var result = redis.HEXISTSync('users', email);
     return result;
 }
 
@@ -52,7 +52,7 @@ function addClientReq(name, email, password){
             var salt = name.split(0,5);
 
             request.status = 1;
-            request.req_Date = new Date();
+            request.req_Date = new Date().getMilliseconds();
             request.info.client_name = name;
             request.info.client_password = password;
             request.info.client_email = email;
@@ -128,14 +128,16 @@ function delClientReq(reqID){
     });
 }
 
-function createAccount(reqObject){
+function createAccount(requestID){
     return new Promise(async (resolve, reject) => {
-        
-            var request = JSON.parse(reqObject);
+        try{
+            var clients = await redis.SMEMBERSSync('req_clients');
+            console.log(new Date());
+            var request = JSON.parse(clients[requestID]);
+            
             var salt = request.info.client_name.slice(0,5);
             var newName = request.info.client_name.split(' ');
             var now = new Date();
-
             var logs = {
                 log : {
                     now : { "event" : "account created" }
@@ -143,27 +145,37 @@ function createAccount(reqObject){
                 security : {
                     now : { "event" : "password reset", "notes" : "account setup" }
                 }
-            }
-
+            };
             var passwords = {
                 "password" : genEncyptPassword(request.info.client_password, salt),
                 "salt" : salt
             };
-
             var GUID = generateGUID();
-        try {
-            var add = await redis.HSETSync(GUID,'email', request.info.client_email);
+
+            var add = await redis.HSETNXSync(GUID,'email', request.info.client_email);                       
             if(add){
-                await redis.HSETSync(GUID,'name', JSON.stringify({ "First" : newName[0], "Last" : newName[1] }));
-                await redis.HSETSync(GUID, 'passwords', JSON.stringify(passwords));
-                await redis.HSETSync(GUID, 'logs', JSON.stringify(logs));
+                try {
+                    await redis.HSETSync(GUID,'name', JSON.stringify({ "First" : newName[0], "Last" : newName[1] }));
+                    await redis.HSETSync(GUID, 'passwords', JSON.stringify(passwords));
+                    await redis.HSETSync(GUID, 'logs', JSON.stringify(logs));
+
+                    request.status = 0;
+
+                    await redis.SREMSync('req_clients', clients[requestID]);
+                    await redis.SADDSync('req_clients', JSON.stringify(request));
+
+                    await redis.HSETSync('users',request.info.client_email,GUID);
+
+                } catch(err) {
+                    reject({"Error" : "Error Adding User Values", "Method" : "createAccount()", "Code" : 3});
+                }
                 resolve(true);
             } else {
                 reject({"Error" : "Error Adding User", "Method" : "createAccount()", "Code" : 2})
             }
 
         } catch(err) {
-            reject({"Error" : err, "Method" : "createAccount()", "Code" : 1})    
+            reject(new Error(`{"Error" : ${err}, "Method" : "createAccount()", "Code" : 1}`));    
         }
     });
 }

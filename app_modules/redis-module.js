@@ -421,6 +421,19 @@ module.exports = {
                     });
                 },
 
+                HSETNXSync(key, field, value){
+                    return new Promise((resolve, reject) => {
+                        client.HSETNX(key, field, value, (err, res) => {
+                            if(err){
+                                smc.getMessage(1,0,`HSETNX Error: ${err}`);
+                                reject(err);
+                            } else {
+                                res == 0 ? resolve(false) : resolve(true);
+                            }
+                        });
+                    });
+                },
+
             // Get List of Values
                 HVALSync(key){
                     return new Promise((resolve, reject) => {

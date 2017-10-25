@@ -78,7 +78,25 @@ function getClientReqByID(listID){
     });
 }
 
-function getClientReqPending(){}
+function getClientReqPending(){
+    return new Promise(async (resolve, reject) => {
+        try {
+            var clients = await redis.SMEMBERSSync('req_clients');
+            var pendingClients = [];
+
+            clients.forEach((client) => {
+                var clientJSON = JSON.parse(client);
+                if(clientJSON.status == 1){
+                    pendingClients.push(client);
+                }
+            });
+
+            resolve(pendingClients);
+        } catch(err) {
+            reject({"Error" : err, "Method" : "getClientReqPending()", "Code" : 1})
+        }
+    });
+}
 
 
 

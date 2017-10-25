@@ -6,7 +6,16 @@ var crypto = require('crypto');
 var redis = require('./redis-module'); 
 var smc = require('./server-message-creator');
 
+var templates = {
+    user : fs.readFileSync('./app_modules/template/user-template.json', "UTF-8"),
+    req_client : fs.readFileSync('./app_modules/template/req_client-template.json', "UTF-8"),
+};
+
 // Functions
+
+function generateGUID(){}
+
+function genEncyptPassword(){}
 
 function validUser(GUID){
     var result = redis.EXISTSync(GUID);
@@ -93,11 +102,30 @@ function getClientReqByStatus(status){
 
             resolve(pendingClients);
         } catch(err) {
-            reject({"Error" : err, "Method" : "getClientReqPending()", "Code" : 1})
+            reject({"Error" : err, "Method" : "getClientReqByStatus()", "Code" : 1})
         }
     });
 }
 
+function delClientReq(reqID){
+    return new Promise(async (resolve, reject) => {
+        try{
+            var client = await redis.SMEMBERSSync('req_clients');
+            if(reqID < (client.length - 1)){    
+                var rem = await redis.SREMSync('req_clients', client[reqID]);
+                resolve(rem);
+            } else {
+                reject({"Error" : "IndexOutOfBounds", "Method" : "delClientReq()", "Code" : 2})    
+            }
+        } catch(err) {
+            reject({"Error" : err, "Method" : "delClientReq()", "Code" : 1})
+        }
+    });
+}
+
+function createAccount(reqObject){
+
+}
 
 // Exports
 
@@ -105,4 +133,6 @@ module.exports.addClientReq = addClientReq;
 
 module.exports.getClientReq = getClientReq;
 module.exports.getClientReqByID = getClientReqByID;
-module.exports.getClientReqPending = getClientReqPending;
+module.exports.getClientReqByStatus = getClientReqByStatus;
+
+module.exports.delClientReq = delClientReq;

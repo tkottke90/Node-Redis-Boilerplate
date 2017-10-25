@@ -67,7 +67,16 @@ function getClientReq(){
     });
 }
 
-function getClientReqByID(){}
+function getClientReqByID(listID){
+    return new Promise(async (resolve, reject) => {
+        try {
+            var clients = await redis.SMEMBERSSync('req_clients');
+            resolve(client[listID]);
+        } catch(err) {
+            reject({"Error" : err, "Method" : "getClientReqByID()", "Code" : 1});
+        }
+    });
+}
 
 function getClientReqPending(){}
 

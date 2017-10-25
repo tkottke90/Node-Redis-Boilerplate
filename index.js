@@ -12,6 +12,8 @@
     const smc = require('./app_modules/server-message-creator.js');
     const redis = require('./app_modules/redis-module.js');
     const auth = require('./app_modules/auth-module.js');
+    const users = require('./app_modules/user-module.js');
+    const api = require('./app_modules/api-module.js');
 
 // Variables
     var root = '';
@@ -63,10 +65,12 @@
         smc.getMessage(0,null,"Test Function \n");
 
         try {
+            var client = await users.getClientReqByID(1);
 
+            console.log(client);
 
         } catch(e) {
-            smc.getMessage(0,5,e);
+            smc.getMessage(0,5,JSON.stringify(e));
         }
 
         console.log("\n")

@@ -65,13 +65,13 @@
         smc.getMessage(0,null,"Test Function \n");
 
         try {
-            var client = await users.getClientReqByID(1);
-            var addClient = await users.createAccount(client);
+
+            var delClient = await users.deleteAccount("b9c071db-0721-cb56-8bd3-e0fbc89cfd90");
             
-            console.log(`Created Client?: ${addClient}`);
+            console.log(`Deleted Client?: ${delClient}`);
 
         } catch(e) {
-            smc.getMessage(0,5,JSON.stringify(e));
+            typeof e == 'object' ? smc.getMessage(0,5,JSON.stringify(e)) : smc.getMessage(0,5,e);
         }
 
         console.log("\n")

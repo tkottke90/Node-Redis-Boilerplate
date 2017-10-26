@@ -27,7 +27,7 @@ function addAPIReq(userGUID, apiName){
             }
 
         } else {
-            reject({"Error" : "No User Found", "Method" : "addAPIReq()", "Code" : 1});
+            reject(new Error(`{"Error" : "No User Found", "Method" : "addAPIReq()", "Code" : 1}`));
         }
     });
 }

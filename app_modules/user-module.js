@@ -180,6 +180,43 @@ function createAccount(requestID){
     });
 }
 
+function deleteAccount(GUID){
+    return new Promise(async (resolve, reject) => {
+        try{
+            var user = await redis.HGETALLSync(GUID);
+            if(user != null){
+                fs.exists('./app_modules/archive', async (err, res) => {
+                    if(err){
+                        //reject({"Error" : err, "Res" : res, "Method" : "deleteAccount()", "Code" : 3});
+                    } else if(!res){
+                        await fs.mkdirSync('./app_modules/archive');
+                    }
+                    fs.writeFile(`./app_module/archive/${GUID}.json`, user, async (err, res) => {
+                        if(err) {
+                           reject({"Error" : err, "Method" : "deleteAccountReq()", "Code" : 4});
+                        } else {
+                            var JSONuser = JSON.parse(user);
+                            await redis.HDELSync('users', user.email);
+                            redis.DEL(GUID, (err, res) => {
+                                if(err){
+                                    reject({"Error" : err, "Method" : "deleteAccountReq()", "Code" : 5});
+                                } else {
+                                    resolve(res);
+                                }
+                            });
+                        }
+                    });
+
+                });
+            } else {
+                reject({"Error" : "No User Found", "Method" : "deleteAccount()", "Code" : 2});
+            }
+        } catch(err) {
+            reject({"Error" : err, "Method" : "deleteAccount()", "Code" : 1})
+        }
+    });
+}
+
 // Exports
 
 module.exports.addClientReq = addClientReq;
@@ -191,3 +228,4 @@ module.exports.getClientReqByStatus = getClientReqByStatus;
 module.exports.delClientReq = delClientReq;
 
 module.exports.createAccount = createAccount;
+module.exports.deleteAccount = deleteAccount;

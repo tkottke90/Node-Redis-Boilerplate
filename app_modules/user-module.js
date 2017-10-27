@@ -2,6 +2,7 @@
 
 var fs = require('fs');
 var crypto = require('crypto');
+var path = require('path');
 var guid =  require('guid');
 
 var redis = require('./redis-module'); 
@@ -191,13 +192,14 @@ function deleteAccount(GUID){
                     } else if(!res){
                         await fs.mkdirSync('./app_modules/archive');
                     }
-                    fs.writeFile(`./app_module/archive/${GUID}.json`, user, async (err, res) => {
+                    fs.writeFile(path.join('./app_modules', 'archive', `${GUID}.json`), JSON.stringify(user), async (err, res) => {
                         if(err) {
                            reject({"Error" : err, "Method" : "deleteAccountReq()", "Code" : 4});
                         } else {
-                            var JSONuser = JSON.parse(user);
+                            
+                            var JSONuser = user;
                             await redis.HDELSync('users', user.email);
-                            redis.DEL(GUID, (err, res) => {
+                            redis.client.DEL(GUID, (err, res) => {
                                 if(err){
                                     reject({"Error" : err, "Method" : "deleteAccountReq()", "Code" : 5});
                                 } else {

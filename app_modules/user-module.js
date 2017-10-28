@@ -74,7 +74,7 @@ async function addToUserLog(GUID, event, notes){
     }
 }
 
-//endregion
+//endregion Private Functions
 //region Exported Methods
 
 function addClientReq(name, email, password){
@@ -220,20 +220,20 @@ function getUserInfo(GUID){}
 
 function getUserProp(GUID, prop){}
 
-// Example
-// cbc0857b-e4b5-8101-d856-d9086c02d4c4 - logs/log - key : {value}
-
 function editAccount(GUID, propPath, newValue){
     return new Promise(async (resolve, reject) => {
         try {
-            var path = propPath.split('.');
+            var path = propPath.split('/');
 
             var userProp = await redis.HGETSync(GUID, prop[0]);
 
-            if(userProp == nil) {
+            if(userProp != nil) {
 
+                
+
+            } else {
+                return false;
             }
-            
         } catch(err) {
 
         }
@@ -278,7 +278,8 @@ function deleteAccount(GUID){
     });
 }
 
-//endregion
+//endregion Exported Methods
+
 //region Exports
 
 
@@ -294,6 +295,4 @@ module.exports.createAccount = createAccount;
 module.exports.editAccount = editAccount;
 module.exports.deleteAccount = deleteAccount;
 
-
-module.exports.addToUserLog = addToUserLog;
-//endregion
+//endregion Exports

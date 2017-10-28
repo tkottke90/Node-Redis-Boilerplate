@@ -5,6 +5,7 @@
     const https = require('https');
     const fs = require('fs');
     const crypto = require('crypto');
+    const path = require('path');
     // Extra
     const express = require('express');
     const bparser = require('body-parser');
@@ -53,8 +54,7 @@
         redis.startRedis();
 
         // Test 
-        
-        test();
+        setTimeout((err) => { test() }, 2000)
         
 
         // End Test
@@ -62,16 +62,22 @@
     }); 
 
     async function test(){
-        smc.getMessage(0,null,"Test Function \n");
+        smc.getMessage(0,null,"Test Function \n\n");
 
         try {
 
-            var delClient = await users.deleteAccount("b9c071db-0721-cb56-8bd3-e0fbc89cfd90");
-            
-            console.log(`Deleted Client?: ${delClient}`);
+            //var logs = await redis.HGETSync("cbc0857b-e4b5-8101-d856-d9086c02d4c4", 'logs');
 
+            //var jsonPath = 'logs.log'.split('.');
+
+            var logadd = await users.addToUserLog('cbc0857b-e4b5-8101-d856-d9086c02d4c4', "test", "");
+
+            console.log(logadd);
+        
         } catch(e) {
-            typeof e == 'object' ? smc.getMessage(0,5,JSON.stringify(e)) : smc.getMessage(0,5,e);
+            console.log("Error: See Debugging Tools To Resume and Review Error");
+            debugger;
+            typeof e == 'object' ? console.table(e) : smc.getMessage(0,5,e);
         }
 
         console.log("\n")

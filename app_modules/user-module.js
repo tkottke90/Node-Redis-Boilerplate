@@ -58,14 +58,14 @@ async function addToUserLog(GUID, event, notes){
         // Get Event Logs
         var eventLog = JSON.parse(logs);
         // Get Current Time 
-        var curTime = new Date().now();
+        var curTime = Date.now();
 
-        eventLog.logs[curTime] = {
+        eventLog.log[curTime] = {
             "event" : event,
             "notes" : notes
         }
 
-        var write = await redis.HSETSync(GUID, 'logs', eventLog);
+        var write = await redis.HSETSync(GUID, 'logs', JSON.stringify(eventLog));
         return write;
 
     } catch(reject) {
@@ -294,4 +294,6 @@ module.exports.createAccount = createAccount;
 module.exports.editAccount = editAccount;
 module.exports.deleteAccount = deleteAccount;
 
+
+module.exports.addToUserLog = addToUserLog;
 //endregion

@@ -11,6 +11,9 @@ var smc = require('./server-message-creator');
 var templates = {
     user : fs.readFileSync('./app_modules/template/user-template.json', "UTF-8"),
     req_client : fs.readFileSync('./app_modules/template/req_client-template.json', "UTF-8"),
+    regExp : {
+        email : /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/
+    }
 };
 
 
@@ -29,13 +32,18 @@ function genEncyptPassword(password, salt){
     return password;
 }
 
+function getUser(email){
+    var user = redis.HGETSync('users', email);
+    return user;
+}
+
 function validUser(GUID){
     var result = redis.EXISTSync(GUID);
     return result;
 }
 
 function validEmail(email){
-    return regExp.email.test(email);
+    return templates.regExp.email.test(email);
 }
 
 function emailInUse(email){

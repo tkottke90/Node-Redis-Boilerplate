@@ -13,7 +13,8 @@ var templates = {
     req_client : fs.readFileSync('./app_modules/template/req_client-template.json', "UTF-8"),
 };
 
-// Functions
+
+//region Private Functions
 
 function generateGUID(){
     var newGUID =  guid.create();
@@ -42,6 +43,32 @@ function emailInUse(email){
     return result;
 }
 
+async function addToUserLog(GUID, event, notes){
+    try{
+        // Get User Logs
+        var logs = await redis.HGETSync(GUID, 'logs');
+        // Get Event Logs
+        var eventLog = JSON.parse(logs);
+        // Get Current Time 
+        var curTime = new Date().now();
+
+        eventLog.logs[curTime] = {
+            "event" : event,
+            "notes" : notes
+        }
+
+        var write = await redis.HSETSync(GUID, 'logs', eventLog);
+        return write;
+
+    } catch(reject) {
+        smc.getMessage(0,5,`Error Adding Log to User: ${GUID} - Error: ${reject}`);
+        return(false);
+    }
+}
+
+//endregion
+//region Exported Methods
+
 function addClientReq(name, email, password){
     return new Promise(async (resolve, reject) => {
         if(!validEmail(email)){
@@ -53,7 +80,7 @@ function addClientReq(name, email, password){
             var salt = name.split(0,5);
 
             request.status = 1;
-            request.req_Date = new Date().getMilliseconds();
+            request.req_Date = new Date().getMilliseconds().toString();
             request.info.client_name = name;
             request.info.client_password = password;
             request.info.client_email = email;
@@ -138,7 +165,7 @@ function createAccount(requestID){
             
             var salt = request.info.client_name.slice(0,5);
             var newName = request.info.client_name.split(' ');
-            var now = new Date();
+            var now = new Date().getTime();
             var logs = {
                 log : {
                     now : { "event" : "account created" }
@@ -181,6 +208,30 @@ function createAccount(requestID){
     });
 }
 
+function getUserInfo(GUID){}
+
+function getUserProp(GUID, prop){}
+
+// Example
+// cbc0857b-e4b5-8101-d856-d9086c02d4c4 - logs/log - key : {value}
+
+function editAccount(GUID, propPath, newValue){
+    return new Promise(async (resolve, reject) => {
+        try {
+            var path = propPath.split('.');
+
+            var userProp = await redis.HGETSync(GUID, prop[0]);
+
+            if(userProp == nil) {
+
+            }
+            
+        } catch(err) {
+
+        }
+    });
+}
+
 function deleteAccount(GUID){
     return new Promise(async (resolve, reject) => {
         try{
@@ -219,7 +270,9 @@ function deleteAccount(GUID){
     });
 }
 
-// Exports
+//endregion
+//region Exports
+
 
 module.exports.addClientReq = addClientReq;
 
@@ -230,4 +283,7 @@ module.exports.getClientReqByStatus = getClientReqByStatus;
 module.exports.delClientReq = delClientReq;
 
 module.exports.createAccount = createAccount;
+module.exports.editAccount = editAccount;
 module.exports.deleteAccount = deleteAccount;
+
+//endregion

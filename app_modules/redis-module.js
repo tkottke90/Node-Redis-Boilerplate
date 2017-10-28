@@ -415,7 +415,7 @@ module.exports = {
                                 smc.getMessage(1,0,`HSET Error: ${err}`);
                                 reject(err);
                             } else {
-                                res == 0 ? resolve(false) : resolve(true);
+                                resolve(true);
                             }
                         });
                     });

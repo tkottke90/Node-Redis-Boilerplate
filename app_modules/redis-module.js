@@ -434,6 +434,28 @@ module.exports = {
                     });
                 },
 
+                HSETX(key, field, value){
+                    return new Promise((resolve, reject) => {
+                        client.HEXISTS(key, field, async (err, res) => {
+                            if(err){
+                                smc.getMessage(1,0,`HSETX Error: ${err}`);
+                                reject(err);
+                            } else if(!res){
+                                client.HSET(key, field, value, (err, res) => {
+                                    if(err){
+                                        smc.getMessage(1,0,`HSETX Error: ${err}`);
+                                        reject(err);
+                                    } else {
+                                        resolve(res == 0);
+                                    }
+                                });
+                            } else {
+                                resolve(false);
+                            }
+                        });
+                    });
+                },
+
             // Get List of Values
                 HVALSync(key){
                     return new Promise((resolve, reject) => {

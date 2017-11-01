@@ -440,7 +440,7 @@ module.exports = {
                             if(err){
                                 smc.getMessage(1,0,`HSETX Error: ${err}`);
                                 reject(err);
-                            } else if(!res){
+                            } else if(res){
                                 client.HSET(key, field, value, (err, res) => {
                                     if(err){
                                         smc.getMessage(1,0,`HSETX Error: ${err}`);

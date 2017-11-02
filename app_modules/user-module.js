@@ -32,16 +32,6 @@ function genEncyptPassword(password, salt){
     return password;
 }
 
-function getUser(email){
-    var user = redis.HGETSync('users', email);
-    return user;
-}
-
-function validUser(GUID){
-    var result = redis.EXISTSync(GUID);
-    return result;
-}
-
 function validEmail(email){
     return templates.regExp.email.test(email);
 }
@@ -84,6 +74,16 @@ async function addToUserLog(GUID, event, notes){
 
 //endregion Private Functions
 //region Exported Methods
+
+function validUser(GUID){
+    var result = redis.EXISTSync(GUID);
+    return result;
+}
+
+function getUser(email){
+    var user = redis.HGETSync('users', email);
+    return user;
+}
 
 function addClientReq(name, email, password){
     return new Promise(async (resolve, reject) => {
@@ -261,17 +261,25 @@ function editAccount(GUID, propPath, newValue){
             // Get Path of Property
             var path = propPath.split('/');
             // Get Root Property
-            var userProp = await redis.HGETSync(GUID, path[0]); var returnVal = false;
+            var userProp = await redis.HGETSync(GUID, path[0]); 
+            var returnVal = false, prevVal;
             // Evaluate if property is a stored object
             if(userProp.split('')[0] == '{'){
                 // If it is a JSON Object, parse and update property
                 var jsonProp = JSON.parse(userProp);
                 if(propertyExists(jsonProp, path[1])) { 
                     jsonProp[path[1]] = newValue;
-                    returnVal = await redis.HSETX(GUID, path[0], exJSON.stringify(jsonProp));
+                    returnVal = await redis.HSETX(GUID, path[0], JSON.stringify(jsonProp));
                 }
             } else {
                 returnVal = await redis.HSETX(GUID,path[0],newValue);
+            }
+            if(returnVal){
+                var valObj = {
+                    'previous_value' : prevVal,
+                    'new_value' : newValue
+                }
+                await addToUserLog(GUID, `Property Update: ${propPath}`, valObj);
             }   
             resolve(returnVal);
         } catch(err) {
@@ -328,9 +336,10 @@ module.exports.addClientReq = addClientReq;
 module.exports.getClientReq = getClientReq;
 module.exports.getClientReqByID = getClientReqByID;
 module.exports.getClientReqByStatus = getClientReqByStatus;
-
 module.exports.delClientReq = delClientReq;
 
+module.exports.getUser = getUser;
+module.exports.validUser = validUser;
 module.exports.createAccount = createAccount;
 module.exports.editAccount = editAccount;
 module.exports.getUserInfo = getUserInfo;

@@ -2,9 +2,14 @@
 
 var fs = require('fs');
 var crypto = require('crypto');
+var uuid = require('uuid/v1')
 
 var redis = require('./redis-module'); 
 var smc = require('./server-message-creator');
+
+var templates = {
+    req_API : fs.readFileSync('./app_modules/template/req_data-template.json', 'UTF-8')
+}
 
 // Functions
 
@@ -34,6 +39,11 @@ function addAPIReq(userGUID, apiName){
 
 function getAPIReq(){}
 
-function getAPIReqByID(){}
+function getAPIReqByID(id){}
+
+function deleteAPIReq(id){}
 
 // Exports
+
+module.exports.addAPIReq = addAPIReq;
+module.exports.getAPIReq = getAPIReq;

@@ -55,6 +55,10 @@ function emailInUse(email){
     return result;
 }
 
+function innerJSON(json, property){
+    return json[property];
+}
+
 async function addToUserLog(GUID, event, notes){
     try{
         // Get User Logs
@@ -231,7 +235,25 @@ function getUserInfo(GUID){
     });
 }
 
-function getUserProp(GUID, prop){}
+function getUserProp(GUID, prop){
+    return new Promise(async (resolve, reject) => {
+        try {
+            var path = prop.split('/')
+            var user = await redis.HGETSync(GUID, path[0]);
+            if(path.length == 1){
+                user != null ? resolve(user) : reject({"Error" : "No User Found", "Method" : "getUserProp()", "Code" : 2});
+            } else {
+                user = JSON.parse(user);
+                for(var i = 1; i < path.length; i++){
+                    user = user[path[i]] != null ? user[path[i]] : reject({"Error" : "No User Found", "Method" : "getUserProp()", "Code" : 2});
+                }
+                typeof user == 'object' ? resolve(JSON.stringify(user)) : resolve(user);
+            }
+        } catch(err) {
+            reject({"Error" : err, "Method" : "getUserProp()", "Code" : 1});
+        }
+    });
+}
 
 function editAccount(GUID, propPath, newValue){
     return new Promise(async (resolve, reject) => {
@@ -312,6 +334,7 @@ module.exports.delClientReq = delClientReq;
 module.exports.createAccount = createAccount;
 module.exports.editAccount = editAccount;
 module.exports.getUserInfo = getUserInfo;
+module.exports.getUserProp = getUserProp;
 module.exports.deleteAccount = deleteAccount;
 
 //endregion Exports

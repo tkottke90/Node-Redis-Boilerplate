@@ -43,11 +43,36 @@ function getAPIReq(){
     });
 }
 
-function getAPIReqByID(id){}
+function getAPIReqByID(apiID){
+    return new Promise(async (resolve, reject) => {
+        try {
+            var apis = await redis.SMEMBERSSync('req_api');
+            resolve(apis[apiID]);
+        } catch(err) {
+            reject({"Error" : err, "Method" : "getAPIReqByID()", "Code" : 1});
+        }
+    });    
+}
 
-function deleteAPIReq(id){}
+function deleteAPIReq(apiID){
+    return new Promise(async (resolve, reject) => {
+        try{
+            var api = await redis.SMEMBERSSync('req_api');
+            if(apiID < api.length){    
+                var rem = await redis.SREMSync('req_api', api[apiID]);
+                resolve(rem);
+            } else {
+                reject({"Error" : "IndexOutOfBounds", "Method" : "delAPIReq()", "Code" : 2})    
+            }
+        } catch(err) {
+            reject({"Error" : err, "Method" : "delAPIReq()", "Code" : 1})
+        }
+    });
+}
 
 // Exports
 
 module.exports.addAPIReq = addAPIReq;
 module.exports.getAPIReq = getAPIReq;
+module.exports.getAPIReqByID = getAPIReqByID;
+module.exports.deleteAPIReq = deleteAPIReq;

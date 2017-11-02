@@ -6,6 +6,7 @@ var uuid = require('uuid/v1')
 
 var redis = require('./redis-module'); 
 var smc = require('./server-message-creator');
+var users = require('./user-module');
 
 var templates = {
     req_API : fs.readFileSync('./app_modules/template/req_data-template.json', 'UTF-8')
@@ -15,29 +16,32 @@ var templates = {
 
 function addAPIReq(userGUID, apiName){
     return new Promise(async (resolve, reject) => {
-        var validGUID = validUser(userGUID);
-        if(validGUID){
-            var request = JSON.parse(templates.req_API);
+        var request = JSON.parse(templates.req_API);
 
-            request.status = 1;
-            request.req_date = new Date();
-            request.info.clientGUID = userGUID;
-            request.info.project_name = apiName;
+        request.status = 1;
+        request.req_date = new Date();
+        request.info.clientGUID = userGUID;
+        request.info.project_name = apiName;
 
-            try{
-                var add = await redis.SADDSync('req_api', JSON.stringify(request));
-                resolve(add);
-            } catch(reject) {
-                reject({"Error" : reject, "Method" : "addAPIReq()", "Code" : 2});
-            }
-
-        } else {
-            reject(new Error(`{"Error" : "No User Found", "Method" : "addAPIReq()", "Code" : 1}`));
+        try{
+            var add = await redis.SADDSync('req_api', JSON.stringify(request));
+            resolve(add);
+        } catch(reject) {
+            reject({"Error" : reject, "Method" : "addAPIReq()", "Code" : 1});
         }
     });
 }
 
-function getAPIReq(){}
+function getAPIReq(){
+    return new Promise(async (resolve, reject) => {
+        try {
+            var apis = await redis.SMEMBERSSync('req_api');
+            resolve(apis);
+        } catch(err) {
+            reject({"Error" : err, "Method" : "getAPIReq()", "Code" : 1});
+        }
+    });
+}
 
 function getAPIReqByID(id){}
 

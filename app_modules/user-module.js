@@ -220,7 +220,16 @@ function createAccount(requestID){
     });
 }
 
-function getUserInfo(GUID){}
+function getUserInfo(GUID){
+    return new Promise(async (resolve, reject) => {
+        try {
+            var user = await redis.HGETALLSync(GUID);
+            user != null ? resolve(user) : reject({"Error" : "No User Found", "Method" : "getUserInfo()", "Code" : 2});
+        } catch(err) {
+            reject({"Error" : err, "Method" : "getUserInfo()", "Code" : 1});
+        }
+    });
+}
 
 function getUserProp(GUID, prop){}
 
@@ -235,8 +244,7 @@ function editAccount(GUID, propPath, newValue){
             if(userProp.split('')[0] == '{'){
                 // If it is a JSON Object, parse and update property
                 var jsonProp = JSON.parse(userProp);
-                if(propertyExists(jsonProp, path[1])) {
-                    console.log('line 240'); 
+                if(propertyExists(jsonProp, path[1])) { 
                     jsonProp[path[1]] = newValue;
                     returnVal = await redis.HSETX(GUID, path[0], exJSON.stringify(jsonProp));
                 }
@@ -303,7 +311,7 @@ module.exports.delClientReq = delClientReq;
 
 module.exports.createAccount = createAccount;
 module.exports.editAccount = editAccount;
+module.exports.getUserInfo = getUserInfo;
 module.exports.deleteAccount = deleteAccount;
 
-module.exports.temp = propertyExists;
 //endregion Exports

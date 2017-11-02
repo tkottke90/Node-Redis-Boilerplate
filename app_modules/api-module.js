@@ -12,7 +12,43 @@ var templates = {
     req_API : fs.readFileSync('./app_modules/template/req_data-template.json', 'UTF-8')
 }
 
-// Functions
+//region Private Functions
+
+async function addToAPILog(apiKey, event, notes){
+    try{
+        // Get User Logs
+        var logs = await redis.HGETSync(apiKey, 'logs');
+        // Get Event Logs
+        var eventLog = JSON.parse(logs);
+        // Get Current Time 
+        var curTime = Date.now();
+
+        eventLog.log[curTime] = {
+            "event" : event,
+            "notes" : notes
+        }
+
+        var write = await redis.HSETSync(apiKey, 'logs', JSON.stringify(eventLog));
+        return write;
+
+    } catch(reject) {
+        smc.getMessage(0,5,`Error Adding Log to User: ${apiKey} - Error: ${reject}`);
+        return false;
+    }
+}
+
+async function apiModified(apiKey){
+    var curTime = Date.now();
+    try {
+        var write = await redis.HSETSync(GUID, 'last-update', curTime);
+    } catch(err) {
+        return false
+    }
+    return write
+}
+
+//endregion Private Functions
+//region Exported Methods
 
 function addAPIReq(userGUID, apiName){
     return new Promise(async (resolve, reject) => {
@@ -70,7 +106,11 @@ function deleteAPIReq(apiID){
     });
 }
 
-// Exports
+
+
+//endregion Exported Methods
+
+//region Exports
 
 module.exports.addAPIReq = addAPIReq;
 module.exports.getAPIReq = getAPIReq;

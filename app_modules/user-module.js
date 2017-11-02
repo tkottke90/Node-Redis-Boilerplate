@@ -46,6 +46,10 @@ function validEmail(email){
     return templates.regExp.email.test(email);
 }
 
+function propertyExists(json, property){
+    return json[property] != null
+}
+
 function emailInUse(email){
     var result = redis.HEXISTSync('users', email);
     return result;
@@ -223,19 +227,25 @@ function getUserProp(GUID, prop){}
 function editAccount(GUID, propPath, newValue){
     return new Promise(async (resolve, reject) => {
         try {
+            // Get Path of Property
             var path = propPath.split('/');
-
-            var userProp = await redis.HGETSync(GUID, prop[0]);
-
-            if(userProp != nil) {
-
-                
-
+            // Get Root Property
+            var userProp = await redis.HGETSync(GUID, path[0]); var returnVal = false;
+            // Evaluate if property is a stored object
+            if(userProp.split('')[0] == '{'){
+                // If it is a JSON Object, parse and update property
+                var jsonProp = JSON.parse(userProp);
+                if(propertyExists(jsonProp, path[1])) {
+                    console.log('line 240'); 
+                    jsonProp[path[1]] = newValue;
+                    returnVal = await redis.HSETX(GUID, path[0], exJSON.stringify(jsonProp));
+                }
             } else {
-                return false;
-            }
+                returnVal = await redis.HSETX(GUID,path[0],newValue);
+            }   
+            resolve(returnVal);
         } catch(err) {
-
+            reject({"Error" : err, "Method" : "editAccount()", "Code" : 1});
         }
     });
 }
@@ -295,4 +305,5 @@ module.exports.createAccount = createAccount;
 module.exports.editAccount = editAccount;
 module.exports.deleteAccount = deleteAccount;
 
+module.exports.temp = propertyExists;
 //endregion Exports

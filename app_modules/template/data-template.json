@@ -1,9 +1,9 @@
 {
-    "project-name": "",
-    "user-GUID": "",
-    "create-date": 0,
-    "delete-date": 0,
-    "last-update": 0,
+    "project_name": "",
+    "user_GUID": "",
+    "createDate": 0,
+    "deleteDate": 0,
+    "lastUpdate": 0,
     "logs": {
         "changes" : {},
         "security": {}

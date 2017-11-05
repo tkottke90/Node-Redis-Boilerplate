@@ -331,7 +331,6 @@ function deleteAccount(GUID){
 
 
 module.exports.addClientReq = addClientReq;
-
 module.exports.getClientReq = getClientReq;
 module.exports.getClientReqByID = getClientReqByID;
 module.exports.getClientReqByStatus = getClientReqByStatus;

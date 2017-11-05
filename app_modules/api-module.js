@@ -10,7 +10,7 @@ var users = require('./user-module');
 
 var templates = {
     req_API : fs.readFileSync('./app_modules/template/req_data-template.json', 'UTF-8'),
-    data : fs.readFileSync('./app_modules/template/data-template.json', 'UTF-8')
+    api : fs.readFileSync('./app_modules/template/data-template.json', 'UTF-8')
 }
 
 //region Private Functions
@@ -121,6 +121,7 @@ function deleteAPIReq(apiID){
 
 function createAPI(reqID){
     return new Promise(async (resolve, reject) => {
+<<<<<<< HEAD
         var project_temp = templates.data;
         var now = Date.now();
         var request = await getAPIReqByID(reqID);
@@ -129,6 +130,64 @@ function createAPI(reqID){
         
 
     }); 
+=======
+        let newAPI = JSON.parse(templates.api); 
+        let apiID = uuid();
+        try {
+            let requests = await redis.SMEMBERSSync('req_api');
+            let req = JSON.parse(requests[reqID].info);
+        } catch(err) {
+            reject({"Error" : `Retriving Reqest: ${err}`, "Method" : "createAPI()", "Code" : 1})
+        }
+        
+        newAPI.logs.changes[Date.now()] = {
+           "event" : "API Created",
+           "notes" : ""
+        };
+        newAPI.logs.securty[Date.now()] = {
+           "event" : "No Securty Set",
+           "notes" : ""
+        };
+       
+        try{
+            await redis.HSETNXSync(apiID,'Project_Name', req.project_name);
+            await redis.HSETNXSync(apiID,'user_GUID', req.clientGUID);
+            await redis.HSETNXSync(apiID,'createDate', Date.now());
+            await redis.HSETNXSync(apiID,'lastUpdate', Date.now());
+            await redis.HSETNXSync(apiID,'deleteDate', 0);
+            await redis.HSETNXSync(apiID,)
+        } catch(err){
+
+        }
+       
+
+    });
+}
+function editAPI(UUID){
+    return new Promise(async (resolve, reject) => {
+        
+    });
+}
+function deleteAPI(UUID){
+    return new Promise(async (resolve, reject) => {
+        
+    });
+}
+function getAPIInfo(UUID){
+    return new Promise(async (resolve, reject) => {
+        
+    });
+}
+function getAPIProp(UUID){
+    return new Promise(async (resolve, reject) => {
+        
+    });
+}
+function getAPI(UUID){
+    return new Promise(async (resolve, reject) => {
+        
+    });
+>>>>>>> 07bb5b4ca923b4ed2334f08df0bec41390f7d320
 }
 
 function getAPIInfo(){}

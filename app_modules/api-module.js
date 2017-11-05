@@ -121,16 +121,6 @@ function deleteAPIReq(apiID){
 
 function createAPI(reqID){
     return new Promise(async (resolve, reject) => {
-<<<<<<< HEAD
-        var project_temp = templates.data;
-        var now = Date.now();
-        var request = await getAPIReqByID(reqID);
-        var project = JSON.parse(request);
-
-        
-
-    }); 
-=======
         let newAPI = JSON.parse(templates.api); 
         let apiID = uuid();
         try {
@@ -187,7 +177,6 @@ function getAPI(UUID){
     return new Promise(async (resolve, reject) => {
         
     });
->>>>>>> 07bb5b4ca923b4ed2334f08df0bec41390f7d320
 }
 
 function getAPIInfo(){}

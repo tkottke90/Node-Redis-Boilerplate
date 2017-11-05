@@ -4,6 +4,10 @@
     "create-date": 0,
     "delete-date": 0,
     "last-update": 0,
+    "permissions" : {
+        "read-only" : false,
+        "password" : ""
+    },
     "logs": {
         "changes" : {},
         "security": {}

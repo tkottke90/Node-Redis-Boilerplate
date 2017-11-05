@@ -176,12 +176,11 @@ function createAccount(requestID){
     return new Promise(async (resolve, reject) => {
         try{
             var clients = await redis.SMEMBERSSync('req_clients');
-            console.log(new Date());
             var request = JSON.parse(clients[requestID]);
             
             var salt = request.info.client_name.slice(0,5);
             var newName = request.info.client_name.split(' ');
-            var now = new Date().getTime();
+            var now = Date.now();
             var logs = {
                 log : {
                     now : { "event" : "account created" }

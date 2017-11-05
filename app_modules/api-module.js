@@ -9,10 +9,23 @@ var smc = require('./server-message-creator');
 var users = require('./user-module');
 
 var templates = {
-    req_API : fs.readFileSync('./app_modules/template/req_data-template.json', 'UTF-8')
+    req_API : fs.readFileSync('./app_modules/template/req_data-template.json', 'UTF-8'),
+    data : fs.readFileSync('./app_modules/template/data-template.json', 'UTF-8')
 }
 
 //region Private Functions
+
+async function generateUUID(){
+    var uid = "";
+    var isUnique = false;
+    while(!isUnique){
+        console.log(Date.now());
+        uid = uuid();
+        console.log(isUnique);
+        isUnique = await redis.EXISTSync(uid);
+    }
+    return uid;
+}
 
 async function addToAPILog(apiKey, event, notes){
     try{
@@ -106,7 +119,27 @@ function deleteAPIReq(apiID){
     });
 }
 
+function createAPI(reqID){
+    return new Promise(async (resolve, reject) => {
+        var project_temp = templates.data;
+        var now = Date.now();
+        var request = await getAPIReqByID(reqID);
+        var project = JSON.parse(request);
 
+        
+
+    }); 
+}
+
+function getAPIInfo(){}
+
+function getAPIProp(){}
+
+function editAPI(){}
+
+function archiveAPI(){}
+
+function deleteAPI(){}
 
 //endregion Exported Methods
 
@@ -116,3 +149,12 @@ module.exports.addAPIReq = addAPIReq;
 module.exports.getAPIReq = getAPIReq;
 module.exports.getAPIReqByID = getAPIReqByID;
 module.exports.deleteAPIReq = deleteAPIReq;
+
+module.exports.createAPI = createAPI;
+module.exports.getAPIInfo = getAPIInfo;
+module.exports.getAPIProp = getAPIProp;
+module.exports.editAPI = editAPI;
+module.exports.archiveAPI = archiveAPI;
+module.exports.deleteAPI = deleteAPI;
+
+module.exports.uuid = generateUUID;

@@ -9,7 +9,7 @@
     // Extra
     const express = require('express');
     const bparser = require('body-parser');
-    //const bcrypt = require('bcrypt');    
+
     const smc = require('./app_modules/server-message-creator.js');
     const redis = require('./app_modules/redis-module.js');
     const auth = require('./app_modules/auth-module.js');
@@ -53,31 +53,32 @@
         // Start Redis Connection
         redis.startRedis();
 
+
+        function seconds(number){ return number*1000; }
+
         // Test 
-        setTimeout((err) => { test() }, 2000)
+        setTimeout((err) => { test() }, seconds(2));
         
 
         // End Test
 
     }); 
 
+    
+
+
     async function test(){
         smc.getMessage(0,null,"Test Function \n\n");
 
         try {
 
-            //var logs = await redis.HGETSync("cbc0857b-e4b5-8101-d856-d9086c02d4c4", 'logs');
-
-            //var jsonPath = 'logs.log'.split('.');
-
-            var logadd = await users.addToUserLog('cbc0857b-e4b5-8101-d856-d9086c02d4c4', "test", "");
-
-            console.log(logadd);
-        
+            var test = await api.uuid();
+            console.log(test);
+            
         } catch(e) {
             console.log("Error: See Debugging Tools To Resume and Review Error");
-            debugger;
-            typeof e == 'object' ? console.table(e) : smc.getMessage(0,5,e);
+            console.log(e);
+            //typeof e == 'object' ? console.log(JSON.stringify(e)) : smc.getMessage(0,5,e);
         }
 
         console.log("\n")

@@ -290,7 +290,7 @@ function deleteAccount(GUID){
             if(user != null){
                 fs.exists('./app_modules/archive', async (err, res) => {
                     if(err){
-                        //reject({"Error" : err, "Res" : res, "Method" : "deleteAccount()", "Code" : 3});
+                        reject({"Error" : err, "Res" : res, "Method" : "deleteAccount()", "Code" : 3});
                     } else if(!res){
                         await fs.mkdirSync('./app_modules/archive');
                     }
@@ -298,8 +298,6 @@ function deleteAccount(GUID){
                         if(err) {
                            reject({"Error" : err, "Method" : "deleteAccountReq()", "Code" : 4});
                         } else {
-                            
-                            var JSONuser = user;
                             await redis.HDELSync('users', user.email);
                             redis.client.DEL(GUID, (err, res) => {
                                 if(err){

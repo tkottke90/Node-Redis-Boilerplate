@@ -45,10 +45,6 @@ function emailInUse(email){
     return result;
 }
 
-function innerJSON(json, property){
-    return json[property];
-}
-
 async function addToUserLog(GUID, event, notes){
     try{
         // Get User Logs

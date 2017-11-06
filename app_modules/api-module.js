@@ -248,7 +248,7 @@ function archiveAPI(UUID){
                 } else {
                     redis.client.DEL(UUID, (err, res) => {
                         if(err){
-                            reject({"Error" : `Writing API to Archive: ${err}`, "Method" : "archiveAPI()", "Code" : 3});
+                            reject({"Error" : `Deleting Key from Redis: ${err}`, "Method" : "archiveAPI()", "Code" : 3});
                         } else {
                             res == 0 ? resolve(false) : resolve(true);
                         }
@@ -262,7 +262,12 @@ function archiveAPI(UUID){
 
 function deleteAPI(UUID){
     return new Promise(async (resolve, reject) => {
-        
+        try {
+            let delResult = await redis.DELSync(UUID);
+            resolve(delResult);
+        } catch(err) {
+            reject({"Error" : `Deleting Key from Redis: ${err}`, "Method" : "deleteAPI()", "Code" : 1})
+        }
     });
 }
 

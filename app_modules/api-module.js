@@ -2,6 +2,7 @@
 
 var fs = require('fs');
 var crypto = require('crypto');
+var path = require('path')
 var uuid = require('uuid/v1')
 
 var redis = require('./redis-module'); 
@@ -213,7 +214,49 @@ function editAPI(UUID, Path, newValue){
 
 function archiveAPI(UUID){
     return new Promise(async (resolve, reject) => {
+        // Get API
+        let api;
+        try {   
+            api = await redis.HGETALLSync(UUID);
+        } catch(err) {
+            reject({"Error" : `Error Getting API: ${err}`, "Method" : "archiveAPI()", "Code" : 1});
+        } 
+
+        // Check for Archive Folder
+        if(!fs.existsSync('./app_modules/archive')){
+            fs.mkdirSync('./app/modules/archive');
+        }
+
+        // Convert Redis String to JSON
         
+        let keys = Object.keys(api);
+        for(let k in keys){
+            let val = api[keys[k]].split('');
+            if(val[0] == '{'){
+                console.log
+                api[keys[k]] = JSON.parse(api[keys[k]]);
+            }
+        }
+
+        // Write API to JSON File
+        fs.writeFile(
+            path.join(__dirname, "archive", UUID, '.json'), 
+            JSON.stringify(api), 
+            async (err, res) => {
+                if(err){
+                    reject({"Error" : `Writing API to Archive: ${err}`, "Method" : "archiveAPI()", "Code" : 2})
+                } else {
+                    redis.client.DEL(UUID, (err, res) => {
+                        if(err){
+                            reject({"Error" : `Writing API to Archive: ${err}`, "Method" : "archiveAPI()", "Code" : 3});
+                        } else {
+                            res == 0 ? resolve(false) : resolve(true);
+                        }
+                    });
+                }
+            }
+        );
+
     });
 }
 

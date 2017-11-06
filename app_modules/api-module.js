@@ -121,20 +121,29 @@ function deleteAPIReq(apiID){
 
 function createAPI(reqID){
     return new Promise(async (resolve, reject) => {
-        let newAPI = JSON.parse(templates.api); 
+        let newAPI = {
+            "logs" : {
+                "changes" : {},
+                "security" : {}
+            }
+        }
         let apiID = uuid();
+        let req, requests;
+
         try {
-            let requests = await redis.SMEMBERSSync('req_api');
-            let req = JSON.parse(requests[reqID].info);
+            requests = await redis.SMEMBERSSync('req_api');
+            let reqObj = JSON.parse(requests[reqID]);
+            req = reqObj.info;
         } catch(err) {
             reject({"Error" : `Retriving Reqest: ${err}`, "Method" : "createAPI()", "Code" : 1})
         }
         
-        newAPI.logs.changes[Date.now()] = {
+        let now = Date.now().toString();
+        newAPI.logs.changes[now] = {
            "event" : "API Created",
            "notes" : ""
         };
-        newAPI.logs.securty[Date.now()] = {
+        newAPI.logs.security[now] = {
            "event" : "No Securty Set",
            "notes" : ""
         };
@@ -145,49 +154,52 @@ function createAPI(reqID){
             await redis.HSETNXSync(apiID,'createDate', Date.now());
             await redis.HSETNXSync(apiID,'lastUpdate', Date.now());
             await redis.HSETNXSync(apiID,'deleteDate', 0);
-            await redis.HSETNXSync(apiID,)
+            await redis.HSETNXSync(apiID,'logs', JSON.stringify(newAPI));
+            await redis.HSETNXSync(apiID,'root', JSON.stringify({}));
+
+            await redis.SREMSync('req_api', requests[reqID]);
+            let updateReq = JSON.parse(requests[reqID]);
+            updateReq.status = 0;
+            await redis.SADDSync('req_api', JSON.stringify(updateReq));
+
         } catch(err){
-
+            reject({"Error" : `Creating API: ${err}`, "Method" : "createAPI()", "Code" : 2})
         }
-       
-
+        resolve(true);
     });
 }
+
 function editAPI(UUID){
     return new Promise(async (resolve, reject) => {
         
     });
 }
+
+function archiveAPI(){}
+
 function deleteAPI(UUID){
     return new Promise(async (resolve, reject) => {
         
     });
 }
+
 function getAPIInfo(UUID){
     return new Promise(async (resolve, reject) => {
         
     });
 }
+
 function getAPIProp(UUID){
     return new Promise(async (resolve, reject) => {
         
     });
 }
+
 function getAPI(UUID){
     return new Promise(async (resolve, reject) => {
         
     });
 }
-
-function getAPIInfo(){}
-
-function getAPIProp(){}
-
-function editAPI(){}
-
-function archiveAPI(){}
-
-function deleteAPI(){}
 
 //endregion Exported Methods
 
@@ -204,5 +216,3 @@ module.exports.getAPIProp = getAPIProp;
 module.exports.editAPI = editAPI;
 module.exports.archiveAPI = archiveAPI;
 module.exports.deleteAPI = deleteAPI;
-
-module.exports.uuid = generateUUID;

@@ -36,11 +36,12 @@ async function addToAPILog(apiKey, event, notes){
         // Get Current Time 
         var curTime = Date.now();
 
-        eventLog.log[curTime] = {
+        eventLog.changes[curTime] = {
             "event" : event,
             "notes" : notes
         }
 
+        await apiModified(apiKey);
         var write = await redis.HSETSync(apiKey, 'logs', JSON.stringify(eventLog));
         return write;
 
@@ -122,11 +123,10 @@ function deleteAPIReq(apiID){
 function createAPI(reqID){
     return new Promise(async (resolve, reject) => {
         let newAPI = {
-            "logs" : {
                 "changes" : {},
                 "security" : {}
-            }
         }
+        
         let apiID = uuid();
         let req, requests;
 
@@ -139,11 +139,11 @@ function createAPI(reqID){
         }
         
         let now = Date.now().toString();
-        newAPI.logs.changes[now] = {
+        newAPI.changes[now] = {
            "event" : "API Created",
            "notes" : ""
         };
-        newAPI.logs.security[now] = {
+        newAPI.security[now] = {
            "event" : "No Securty Set",
            "notes" : ""
         };
@@ -169,13 +169,53 @@ function createAPI(reqID){
     });
 }
 
-function editAPI(UUID){
+function editAPI(UUID, Path, newValue){
+    return new Promise(async (resolve, reject) => {
+        let propPath = Path.split('/');
+        let apiProp;
+        try {
+            apiProp = await redis.HGETSync(UUID, propPath[0]);
+        } catch(err) {
+            reject({"Error" : `Getting Property: ${err}`, "Method" : "editAPI()", "Code" : 1});
+        }
+
+        let returnVal = false;
+        
+        // Check of Property is a JSON Object
+        if(apiProp.split('')[0] == '{'){
+            var jsonProp = JSON.parse(apiProp);
+            if(jsonProp[propPath[1]] != null){
+                jsonProp[propPath[1]] = newValue;
+                try {
+                    returnVal = await redis.HSETX(UUID, propPath[0], JSON.stringify(jsonProp));
+                    console.log(returnVal);
+                } catch(err) {
+                    reject({"Error" : `Setting Property: ${err}`, "Method" : "editAPI()", "Code" : 2});
+                }
+            }
+        } else {
+            try{
+                returnVal = await redis.HSETX(UUID, propPath[0], newValue);
+            } catch(err) {
+                reject({"Error" : `Setting Property: ${err}`, "Method" : "editAPI()", "Code" : 3});
+            }
+        }
+        if(returnVal){
+            var logObj = {
+                'previous_value' : apiProp,
+                'new_value' : newValue
+            }
+            await addToAPILog(UUID, `Property Update: ${Path}`, logObj);
+        }
+        resolve(returnVal);
+    });
+}
+
+function archiveAPI(UUID){
     return new Promise(async (resolve, reject) => {
         
     });
 }
-
-function archiveAPI(){}
 
 function deleteAPI(UUID){
     return new Promise(async (resolve, reject) => {
@@ -216,3 +256,19 @@ module.exports.getAPIProp = getAPIProp;
 module.exports.editAPI = editAPI;
 module.exports.archiveAPI = archiveAPI;
 module.exports.deleteAPI = deleteAPI;
+
+
+module.exports.jsonLog = {
+    "changes" : {
+        "1509989601729" : {
+            "event" : "API Created",
+            "notes" : ""
+         }
+    },
+    "security" : {
+        "1509989601729" : {
+            "event" : "No Securty Set",
+            "notes" : ""
+         }
+    }
+};

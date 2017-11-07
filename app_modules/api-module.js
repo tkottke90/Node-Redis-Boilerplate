@@ -273,19 +273,36 @@ function deleteAPI(UUID){
 
 function getAPIInfo(UUID){
     return new Promise(async (resolve, reject) => {
-        
+        let api;
+        try {
+            api = await redis.HGETALLSync(UUID);
+        } catch(err) {
+            reject({"Error" : `HGET : ${err}`, "Method" : "getAPIInfo()", "Code" : 1});
+        }
+        api != null ? resolve(api) : reject({"Error" : "No API Found", "Method" : "getAPIInfo()", "Code" : 2})    
     });
 }
 
-function getAPIProp(UUID){
+function getAPIProp(UUID, Path){
     return new Promise(async (resolve, reject) => {
+        let api;
+        let propPath = Path.split('/');
         
-    });
-}
+        try {
+            api = await redis.HGETSync(UUID,propPath[0]);
+        } catch(err){
+            reject({"Error" : `HGET : ${err}`, "Method" : "getAPIProp()", "Code" : 1});
+        }
 
-function getAPI(UUID){
-    return new Promise(async (resolve, reject) => {
-        
+        if(propPath.length == 1){
+            api != null ? resolve(api) : reject({"Error" : `No Value At API`, "Method" : "getAPIProp()", "Code" : 2})    
+        } else {
+            for(let i in propPath){
+                api = api[propPath[i]] != null ? user[propPath[i]] : reject({"Error" : "No User Found", "Method" : "getAPIProp()", "Code" : 3});
+            }
+
+            typeof api == 'object' ? resolve(JSON.stringify(api)) : resolve(api);
+        }
     });
 }
 

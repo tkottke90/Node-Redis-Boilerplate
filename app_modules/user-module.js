@@ -338,4 +338,6 @@ module.exports.getUserInfo = getUserInfo;
 module.exports.getUserProp = getUserProp;
 module.exports.deleteAccount = deleteAccount;
 
+module.exports.emailRegEx = templates.regExp.email;
+
 //endregion Exports

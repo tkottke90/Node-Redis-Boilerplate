@@ -16,9 +16,11 @@
     const users = require('./app_modules/user-module.js');
     const api = require('./app_modules/api-module.js');
 
+    const expressM = require('./app_modules/express-module/app');
+
 // Variables
     var root = '';
-    var app = express();
+    var app = expressM.app;
 
     var DEBUG = false; // DEBUG Message Setting
 
@@ -31,7 +33,15 @@
     
 // RESTful API
     // GET
+        // GET API
+        app.get(`${root}/api/:api`, (req, res) => {
+            var now = Date.now();
 
+        });
+
+        app.get(`${root}/users/:user`, (req, res) > {
+
+        });
     // PUT
 
     // POST
@@ -71,10 +81,8 @@
         smc.getMessage(0,null,"Test Function \n\n");
 
         try {
-
-            var test = await api.uuid();
-            console.log(test);
-            
+           
+            console.log(process.env.PORT);
         } catch(e) {
             console.log("Error: See Debugging Tools To Resume and Review Error");
             console.log(e);

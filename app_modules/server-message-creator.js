@@ -1,6 +1,7 @@
 "use strict"
 
 var fs = require('fs');
+var { DEBUG } = require('../index.js');
 
 /**
  * Module designed to output messages to server log.  Used to clean up index.js
@@ -26,52 +27,56 @@ var fs = require('fs');
  *      Sever -> `${new Date().toUTCString()} - [ERROR] - `
  *      Crash -> `${new Date().toUTCString()} - [Crash] -
  */
+/**
+ * Method returns a string formatted with a millisecond timestamp
+ * @param {Number} orgin - Reference to originsEnum
+ * @param {Number or Null} action - Reference to actionsEnum
+ * @param {String} message - Message to be recorded
+ */
+async function logMessage(orgin, action, message){
+    var path = './logs/eventLog.log'
+    var now = new Date().toUTCString();
+    var log = messageCreate(origin, action, message);
+    console.log(log);
 
-module.exports = {
+    if(!fs.existsSync('./logs')){
+        fs.mkdirSync('./logs');
+    }
 
-    /**
-     * Method returns a string formatted with a millisecond timestamp
-     * @param {Number} orgin - Reference to originsEnum
-     * @param {Number or Null} action - Reference to actionsEnum
-     * @param {String} message - Message to be recorded
-     */
-    async logMessage(orgin, action, message){
-        var now = new Date().toUTCString();
-        var log = messageCreate(origin, action, message);
-        console.log(log);
-
-        if(!fs.existsSync('./logs')){
-            fs.mkdirSync('./logs');
-        }
-
-        if(!fs.exsits('./logs/eventLog')){
-            var header = 
-                {  
-                    'metaData' : {
-                        'createDate' : 0,
-                        'lastModified' : 0,
-                        'logAge': 0,
-                    },
-                    'logs' : {
-                        now : {
-                            'origin' : origin,
-                            'action' : action,
-                            'message' : message
-                        }
+    if(!fs.exsits('./logs/eventLog.log')){
+        var header = 
+            {  
+                'metaData' : {
+                    'createDate' : 0,
+                    'lastModified' : 0,
+                    'logAge': 0,
+                },
+                'logs' : {
+                    now : {
+                        'process' : process.pid,
+                        'origin' : originsEnum[origin],
+                        'action' : actionEnum[action],
+                        'message' : message
                     }
                 }
-            
-            fs.writeFileSync
-        }
-    },
+            }
+        
+        fs.writeFileSync()
+    } else {
+        var logFile = fs.readFileSync('./logs/eventLog.log');
+    }
+}
 
-    /**
-     * 
-     * @param {Number} origin 
-     * @param {Number} action 
-     * @param {*} message 
-     */
-    getMessage( origin, action, message ){
+/**
+ * 
+ * @param {Number} origin 
+ * @param {Number} action 
+ * @param {*} message 
+ */
+function getMessage( origin, action, message ){
+    if(DEBUG){
+        logMessage(orgin, action, message)
+    } else {
         console.log(messageCreate(origin, action, message));
     }
 }
@@ -105,9 +110,13 @@ const actionEnum = [
 function messageCreate(origin, action, message){
     var now = new Date().toUTCString();
     if(action != null){       
-        return `${now} - ${originsEnum[origin]} - ${actionEnum[action]} - ${message}`;
+        return `[${process.pid}] ${now} - ${originsEnum[origin]} - ${actionEnum[action]} - ${message}`;
     }
     else{
-        return `${now} - ${originsEnum[origin]} - ${message}`;
+        return `[${process.pid}] ${now} - ${originsEnum[origin]} - ${message}`;
     }
 }
+
+
+module.exports.getMessage = getMessage;
+module.exports.logMessage = logMessage;

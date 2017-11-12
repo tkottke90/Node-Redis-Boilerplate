@@ -4,3 +4,4 @@ app_modules/config
 app_modules/archive
 .vs/
 .nyc_output/
+*.log

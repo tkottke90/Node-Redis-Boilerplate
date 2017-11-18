@@ -16,11 +16,9 @@
     const users = require('./app_modules/user-module.js');
     const api = require('./app_modules/api-module.js');
 
-    const expressM = require('./app_modules/express-module/app');
-
 // Variables
     var root = '';
-    var app = expressM.app;
+    var app = express();
 
     var DEBUG = false; // DEBUG Message Setting
 
@@ -34,14 +32,12 @@
 // RESTful API
     // GET
         // GET API
+        
         app.get(`${root}/api/:api`, (req, res) => {
             var now = Date.now();
 
         });
 
-        app.get(`${root}/users/:user`, (req, res) > {
-
-        });
     // PUT
 
     // POST
@@ -52,7 +48,15 @@
 // File System Tasks
 
 // Server Listeners
-    app.listen(8080,function(err){
+    // app.init(() => {
+    //     redis.startRedis()        
+    // });
+
+
+    app.listen(3000,function(err){
+        process.argv[2] == "--DEBUG" ? DEBUG = true : DEBUG = false;
+
+        console.log(`DEBUG: ${DEBUG}`)
         // Check for Errors - Log Server Running Message
         if(!err){ 
             smc.getMessage(0,null,"Server Running on port: 8080"); 
@@ -63,17 +67,15 @@
         // Start Redis Connection
         redis.startRedis();
 
-
-        function seconds(number){ return number*1000; }
-
         // Test 
-        setTimeout((err) => { test() }, seconds(2));
+        //function seconds(number){ return number*1000; }
+        
+        //setTimeout((err) => { test() }, seconds(2));
         
 
         // End Test
 
     }); 
-
     
 
 
@@ -93,3 +95,6 @@
         smc.getMessage(0,null,"End of Test");
         process.exit();
     }
+
+    module.exports.app = app;
+    module.exports.DEBUG = DEBUG;

@@ -1,7 +1,7 @@
 "use strict"
 
 var fs = require('fs');
-var { DEBUG } = require('../index.js');
+var app = require('../index.js');
 
 /**
  * Module designed to output messages to server log.  Used to clean up index.js
@@ -35,7 +35,7 @@ var { DEBUG } = require('../index.js');
  */
 async function logMessage(orgin, action, message){
     var path = './logs/eventLog.log'
-    var now = new Date().toUTCString();
+    var now = Date.now();
     var log = messageCreate(origin, action, message);
     console.log(log);
 
@@ -43,7 +43,7 @@ async function logMessage(orgin, action, message){
         fs.mkdirSync('./logs');
     }
 
-    if(!fs.exsits('./logs/eventLog.log')){
+    if(!fs.exsits(path)){
         var header = 
             {  
                 'metaData' : {
@@ -61,9 +61,20 @@ async function logMessage(orgin, action, message){
                 }
             }
         
-        fs.writeFileSync()
+        fs.writeFileSync(path, JSON.stringify(header), 'UTF-8');
     } else {
-        var logFile = fs.readFileSync('./logs/eventLog.log');
+        let logFile = fs.readFileSync(path);
+        let JSONlog = JSON.parse(logFile);
+
+        JSONlog.logs[now] = {
+            'process' : process.pid,
+            'origin' : originsEnum[origin],
+            'action' : actionEnum[action],
+            'message' : message
+        }
+
+        fs.writeFileSync(path, JSON.stringify(JSONlog));
+    
     }
 }
 
@@ -74,7 +85,8 @@ async function logMessage(orgin, action, message){
  * @param {*} message 
  */
 function getMessage( origin, action, message ){
-    if(DEBUG){
+    console.log(`Debug: ${app.DEBUG}`)
+    if(app.DEBUG){
         logMessage(orgin, action, message)
     } else {
         console.log(messageCreate(origin, action, message));
